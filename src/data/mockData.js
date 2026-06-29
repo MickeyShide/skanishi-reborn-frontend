@@ -31,18 +31,18 @@ export const recentRewards = [
 ];
 
 export const mapPins = [
-  { id: 'roof-beacon', name: 'Маяк на крыше', x: 28, y: 30, rarity: 'epic', big: true },
-  { id: 'orbit-mall', name: 'ТЦ «Орбита»', x: 64, y: 24, rarity: 'rare' },
-  { id: 'eclipse-altar', name: 'Алтарь Затмения', x: 48, y: 48, rarity: 'legendary', big: true },
-  { id: 'metro-sign', name: 'Метро · знак 17', x: 75, y: 56, rarity: 'common' },
-  { id: 'pulse-graffiti', name: 'Граффити «Пульс»', x: 22, y: 60, rarity: 'rare' },
-  { id: 'underground-whisper', name: 'Подземный шёпот', x: 58, y: 70, rarity: 'mythic', big: true },
+  { id: 'roof-beacon', name: 'Маяк на крыше', coords: [55.75162, 37.61866], rarity: 'epic', big: true },
+  { id: 'orbit-mall', name: 'ТЦ «Орбита»', coords: [55.75468, 37.62521], rarity: 'rare' },
+  { id: 'eclipse-altar', name: 'Алтарь Затмения', coords: [55.74889, 37.61174], rarity: 'legendary', big: true, hint: true },
+  { id: 'metro-sign', name: 'Метро · знак 17', coords: [55.75735, 37.63371], rarity: 'common' },
+  { id: 'pulse-graffiti', name: 'Граффити «Пульс»', coords: [55.74648, 37.60497], rarity: 'rare' },
+  { id: 'underground-whisper', name: 'Подземный шёпот', coords: [55.74309, 37.62077], rarity: 'mythic', big: true, hint: true },
 ];
 
 export const nearbyPoints = [
-  { id: 'roof-beacon', name: 'Маяк на крыше', category: 'AR-сцена', rarity: 'epic', distance: '120 м', done: false },
-  { id: 'pulse-graffiti', name: 'Граффити «Пульс»', category: 'QR-метка', rarity: 'rare', distance: '340 м', done: true },
-  { id: 'underground-whisper', name: 'Подземный шёпот', category: 'Секрет', rarity: 'mythic', distance: '510 м', done: false },
+  { id: 'roof-beacon', name: 'Маяк на крыше', coords: [55.75162, 37.61866], category: 'AR-сцена', rarity: 'epic', distance: '120 м', done: false },
+  { id: 'pulse-graffiti', name: 'Граффити «Пульс»', coords: [55.74648, 37.60497], category: 'QR-метка', rarity: 'rare', distance: '340 м', done: true },
+  { id: 'underground-whisper', name: 'Подземный шёпот', coords: [55.74309, 37.62077], category: 'Секрет', rarity: 'mythic', distance: '510 м', done: false },
 ];
 
 export const pointDetails = {
