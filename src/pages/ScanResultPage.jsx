@@ -3,9 +3,12 @@ import { Icon } from '../components/Icon.jsx';
 import { PrimaryButton, RarityTag, Screen } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
 
+import { useScanner } from '../hooks/useScanner.js';
+
 export function ScanResultPage() {
   const navigate = useNavigate();
-  const { claimError, lastClaimResult, clearClaimState } = useAppState();
+  const { claimReward, claimError, lastClaimResult, clearClaimState } = useAppState();
+  const { handleScan } = useScanner();
 
   const item = lastClaimResult?.item;
   const status = lastClaimResult?.status; // 'created' | 'already_collected'
@@ -57,7 +60,10 @@ export function ScanResultPage() {
         <div className="mt-8">
           <PrimaryButton onClick={handleClose}>На главную</PrimaryButton>
         </div>
-        <button type="button" onClick={() => { clearClaimState(); navigate('/scan'); }} className="mt-3.5 w-full text-center font-ui text-[13px] text-sk-text3">
+        <button type="button" onClick={() => {
+          clearClaimState();
+          handleScan();
+        }} className="mt-3.5 w-full text-center font-ui text-[13px] text-sk-text3">
           Сканировать ещё
         </button>
       </div>

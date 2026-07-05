@@ -10,14 +10,12 @@ import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { PointDetailPage } from './pages/PointDetailPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
 import { QuestsPage } from './pages/QuestsPage.jsx';
-import { ScanPage } from './pages/ScanPage.jsx';
 import { ScanResultPage } from './pages/ScanResultPage.jsx';
 import { SplashPage } from './pages/SplashPage.jsx';
 import { XpHistoryPage } from './pages/XpHistoryPage.jsx';
 import { EmptyState, LoadingState, PrimaryButton, Screen } from './components/ui.jsx';
 
 const BACK_TARGETS = {
-  '/scan': '/home',
   '/result': '/home',
   '/xp': '/profile',
   '/achievements': '/profile',
@@ -72,7 +70,6 @@ function AppRoutes() {
         <Route path="/home" element={isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />} />
         <Route path="/map" element={isAuthenticated ? <MapPage /> : <Navigate to="/login" replace />} />
         <Route path="/point/:pointId" element={isAuthenticated ? <PointDetailPage /> : <Navigate to="/login" replace />} />
-        <Route path="/scan" element={isAuthenticated ? <ScanPage /> : <Navigate to="/login" replace />} />
         <Route path="/result" element={isAuthenticated ? <ScanResultPage /> : <Navigate to="/login" replace />} />
         <Route path="/quests" element={isAuthenticated ? <QuestsPage /> : <Navigate to="/login" replace />} />
         <Route path="/profile" element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />} />

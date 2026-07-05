@@ -4,10 +4,14 @@ import { Icon } from '../components/Icon.jsx';
 import { GlassCard, PrimaryButton, RarityTag, Screen } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
 
+import { useScanner } from '../hooks/useScanner.js';
+
 export function PointDetailPage() {
   const navigate = useNavigate();
   const { pointId } = useParams();
-  const { pointDetails, mapPins, selectScanPoint } = useAppState();
+  const { pointDetails, mapPins } = useAppState();
+  const { handleScan } = useScanner();
+
   const point = useMemo(() => {
     const detail = pointDetails[pointId];
     if (detail) return detail;
@@ -108,10 +112,7 @@ export function PointDetailPage() {
             <Icon name="route" size={22} color="rgb(var(--color-text))" />
           </button>
           <PrimaryButton
-            onClick={() => {
-              selectScanPoint(point.id);
-              navigate('/scan', { state: { scanId: point.id } });
-            }}
+            onClick={handleScan}
             icon={<Icon name="qr" size={20} color="rgb(var(--color-ink))" sw={2} />}
           >
             Сканировать

@@ -174,12 +174,16 @@ export function TgHeader({ title, sub, right, back = false, onBack }) {
   );
 }
 
+import { useScanner } from '../hooks/useScanner.js';
+
 export function BottomNav({ active = 'home' }) {
   const navigate = useNavigate();
+  const { handleScan } = useScanner();
+
   const items = [
     { id: 'home', icon: 'home', label: 'Главная', to: '/home' },
     { id: 'map', icon: 'map', label: 'Карта', to: '/map' },
-    { id: 'scan', icon: 'qr', label: 'Скан', center: true, to: '/scan' },
+    { id: 'scan', icon: 'qr', label: 'Скан', center: true, action: handleScan },
     { id: 'quests', icon: 'quest', label: 'Квесты', to: '/quests' },
     { id: 'profile', icon: 'user', label: 'Профиль', to: '/profile' },
   ];
@@ -192,7 +196,7 @@ export function BottomNav({ active = 'home' }) {
 
           if (item.center) {
             return (
-              <button key={item.id} type="button" onClick={() => navigate(item.to)} aria-label={item.label} className="relative flex w-14 justify-center">
+              <button key={item.id} type="button" onClick={item.action} aria-label={item.label} className="relative flex w-14 justify-center">
                 <span
                   className="holo mt-[-26px] flex h-[54px] w-[54px] items-center justify-center rounded-[18px] border-2 border-white/20 text-sk-ink shadow-[0_0_22px_rgba(139,108,255,0.67),0_8px_20px_rgba(0,0,0,0.5)]"
                   style={{ background: 'var(--gradient-primary)', backgroundSize: '180% 180%' }}
