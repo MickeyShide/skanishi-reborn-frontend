@@ -1,4 +1,5 @@
-const API_BASE = '/api/v1';
+const BACKEND_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE = `${BACKEND_URL}/api/v1`;
 const ACCESS_TOKEN_KEY = 'skanishi_access_token';
 
 let refreshPromise = null;

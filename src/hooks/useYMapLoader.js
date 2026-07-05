@@ -25,7 +25,8 @@ async function fetchApiKey() {
     return cachedApiKey;
   }
 
-  const response = await fetch('/map/api-key', { credentials: 'include' });
+  const backendUrl = import.meta.env.VITE_API_URL || '';
+  const response = await fetch(`${backendUrl}/map/api-key`, { credentials: 'include' });
   if (!response.ok) {
     throw new Error('Yandex Maps API key is not configured');
   }
