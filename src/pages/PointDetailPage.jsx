@@ -7,8 +7,34 @@ import { useAppState } from '../context/AppStateContext.jsx';
 export function PointDetailPage() {
   const navigate = useNavigate();
   const { pointId } = useParams();
-  const { pointDetails } = useAppState();
-  const point = useMemo(() => pointDetails[pointId] ?? pointDetails['roof-beacon'], [pointDetails, pointId]);
+  const { pointDetails, mapPins, selectScanPoint } = useAppState();
+  const point = useMemo(() => {
+    const detail = pointDetails[pointId];
+    if (detail) return detail;
+
+    const mapPoint = mapPins.find((item) => item.id === pointId);
+    if (mapPoint) {
+      return {
+        ...mapPoint,
+        category: 'ТОЧКА',
+        distance: 'РЯДОМ',
+        reward: 0,
+        status: 'Доступно',
+        quest: 'Городской маршрут',
+        description: 'Описание точки появится после синхронизации с полными данными маршрута.',
+      };
+    }
+
+    return Object.values(pointDetails)[0] ?? null;
+  }, [mapPins, pointDetails, pointId]);
+
+  if (!point) {
+    return (
+      <Screen glow={false}>
+        <div className="safe-page-x flex h-full items-center justify-center text-center font-ui text-sk-text2">Точка не найдена. Вернись на карту и выбери доступную метку.</div>
+      </Screen>
+    );
+  }
 
   return (
     <Screen glow={false}>
@@ -81,7 +107,13 @@ export function PointDetailPage() {
           <button type="button" className="glass flex h-[54px] w-14 shrink-0 items-center justify-center rounded-2xl">
             <Icon name="route" size={22} color="rgb(var(--color-text))" />
           </button>
-          <PrimaryButton onClick={() => navigate('/scan')} icon={<Icon name="qr" size={20} color="rgb(var(--color-ink))" sw={2} />}>
+          <PrimaryButton
+            onClick={() => {
+              selectScanPoint(point.id);
+              navigate('/scan', { state: { scanId: point.id } });
+            }}
+            icon={<Icon name="qr" size={20} color="rgb(var(--color-ink))" sw={2} />}
+          >
             Сканировать
           </PrimaryButton>
         </div>

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Emblem } from '../components/Brand.jsx';
 import { Icon } from '../components/Icon.jsx';
 import { Screen } from '../components/ui.jsx';
+import { useAppState } from '../context/AppStateContext.jsx';
 
 const features = [
   { icon: 'qr', title: 'Сканируй метки', subtitle: 'QR и AR-точки в реальном мире' },
@@ -11,6 +13,19 @@ const features = [
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { loginWithTelegram, isAuthenticating, authError } = useAppState();
+  const [localError, setLocalError] = useState('');
+
+  const handleLogin = async () => {
+    setLocalError('');
+
+    try {
+      await loginWithTelegram();
+      navigate('/home', { replace: true });
+    } catch (error) {
+      setLocalError(error.message || 'Не удалось войти через Telegram.');
+    }
+  };
 
   return (
     <Screen>
@@ -46,13 +61,15 @@ export function LoginPage() {
         <div className="flex-1" />
 
         <div className="pb-[calc(var(--safe-area-bottom)+40px)]">
+          {(localError || authError) && <div className="mb-3 text-center font-ui text-[12.5px] text-sk-pink">{localError || authError}</div>}
           <button
             type="button"
-            onClick={() => navigate('/home')}
+            onClick={handleLogin}
+            disabled={isAuthenticating}
             className="flex h-14 w-full items-center justify-center gap-[11px] rounded-[17px] bg-[linear-gradient(135deg,#2AABEE,#229ED9)] text-white shadow-[0_0_28px_rgba(42,171,238,0.45),0_10px_24px_rgba(0,0,0,0.4)] active:scale-[0.99]"
           >
             <Icon name="tg" size={22} color="#fff" sw={1.6} />
-            <span className="font-ui text-[16.5px] font-semibold">Войти через Telegram</span>
+            <span className="font-ui text-[16.5px] font-semibold">{isAuthenticating ? 'Подключаем Telegram…' : 'Войти через Telegram'}</span>
           </button>
           <div className="mt-4 text-center font-ui text-[11px] leading-normal text-sk-text3">
             Продолжая, ты соглашаешься с <span className="text-sk-text2">правилами</span> и <span className="text-sk-text2">политикой данных</span>

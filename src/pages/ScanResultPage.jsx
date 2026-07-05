@@ -1,15 +1,36 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon.jsx';
 import { GlassCard, PrimaryButton, RarityTag, Screen } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
 
 export function ScanResultPage() {
   const navigate = useNavigate();
-  const { claimReward, rewardClaimed } = useAppState();
+  const location = useLocation();
+  const { claimReward, rewardClaimed, isClaiming, claimError, lastClaimResult, selectedScanId, pointDetails, mapPins, selectScanPoint } = useAppState();
 
-  const handleClaim = () => {
-    claimReward();
-    navigate('/home');
+  const activeScanId = location.state?.scanId ?? selectedScanId;
+
+  useEffect(() => {
+    if (location.state?.scanId) {
+      selectScanPoint(location.state.scanId);
+    }
+  }, [location.state, selectScanPoint]);
+
+  const selectedPoint = useMemo(() => {
+    if (!activeScanId) return null;
+    return pointDetails[activeScanId] ?? mapPins.find((point) => point.id === activeScanId) ?? null;
+  }, [activeScanId, mapPins, pointDetails]);
+
+  const claimedXp = lastClaimResult?.xp ?? selectedPoint?.reward ?? 0;
+
+  const handleClaim = async () => {
+    try {
+      await claimReward(activeScanId);
+      navigate('/home');
+    } catch {
+      // Error is already shown from context state.
+    }
   };
 
   return (
@@ -26,7 +47,7 @@ export function ScanResultPage() {
         <div className="text-center">
           <div className="font-mono text-[11px] tracking-[3px] text-sk-cyan">СКАН УСПЕШЕН</div>
           <div className="mt-2 font-mono text-[52px] font-bold leading-none text-sk-text [text-shadow:0_0_30px_rgb(var(--color-violet))]">
-            +250<span className="ml-1.5 text-[22px] text-sk-cyan">XP</span>
+            +{claimedXp}<span className="ml-1.5 text-[22px] text-sk-cyan">XP</span>
           </div>
           <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-sk-gold/30 bg-sk-gold/10 px-3 py-1.5">
             <Icon name="bolt" size={13} color="rgb(var(--color-gold))" />
@@ -41,8 +62,8 @@ export function ScanResultPage() {
             </div>
             <div className="min-w-0 flex-1">
               <RarityTag rarity="mythic" />
-              <div className="mt-2 truncate font-ui text-[17px] font-bold text-sk-text">Осколок Затмения</div>
-              <div className="mt-0.5 font-ui text-xs text-sk-text2">Коллекция «Реликвии» · 3/7</div>
+              <div className="mt-2 truncate font-ui text-[17px] font-bold text-sk-text">{selectedPoint?.name ?? 'Выбранная точка'}</div>
+              <div className="mt-0.5 font-ui text-xs text-sk-text2">{selectedPoint?.quest ?? 'Награда будет зачислена после подтверждения backend.'}</div>
             </div>
           </div>
         </div>
@@ -57,8 +78,10 @@ export function ScanResultPage() {
           </div>
         </GlassCard>
 
+        {claimError && <div className="mt-3 text-center font-ui text-[12.5px] text-sk-pink">{claimError}</div>}
+
         <div className="mt-5">
-          <PrimaryButton onClick={handleClaim}>{rewardClaimed ? 'Награда получена' : 'Забрать награду'}</PrimaryButton>
+          <PrimaryButton onClick={handleClaim}>{rewardClaimed ? 'Награда получена' : isClaiming ? 'Забираем…' : 'Забрать награду'}</PrimaryButton>
         </div>
         <button type="button" onClick={() => navigate('/scan')} className="mt-3.5 w-full text-center font-ui text-[13px] text-sk-text3">
           Сканировать ещё

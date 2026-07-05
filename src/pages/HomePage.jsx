@@ -26,6 +26,7 @@ export function HomePage() {
           </button>
         }
       />
+
       <Body>
         <GlassCard glow="#8B6CFF">
           <div className="flex items-center gap-3.5">
@@ -38,6 +39,7 @@ export function HomePage() {
               </div>
             </div>
           </div>
+
           <div className="mt-3.5">
             <XPBar value={user.xp} max={user.nextLevelXp} />
           </div>
@@ -45,7 +47,7 @@ export function HomePage() {
 
         <button
           type="button"
-          onClick={() => navigate('/scan')}
+          onClick={() => navigate('/map')}
           className="holo mt-3.5 block w-full rounded-card p-0.5 text-left shadow-[0_0_30px_rgba(139,108,255,0.33)] active:scale-[0.99]"
           style={{ background: 'var(--gradient-primary)', backgroundSize: '180% 180%' }}
         >
@@ -55,35 +57,40 @@ export function HomePage() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="truncate font-ui text-[17px] font-bold text-sk-text">Сканировать метку</div>
-              <div className="mt-0.5 truncate font-ui text-[12.5px] text-sk-text2">4 точки рядом · до 250 XP</div>
+              <div className="mt-0.5 truncate font-ui text-[12.5px] text-sk-text2">Сначала выбери точку на карте и затем отсканируй её</div>
             </div>
             <Icon name="arrow" size={22} color="rgb(var(--color-text2))" />
           </div>
         </button>
 
-        <SectionTitle>Активный ивент</SectionTitle>
-        <div className="relative mt-2.5 overflow-hidden rounded-[18px] border border-sk-line/10">
-          <div className="stripes absolute inset-0" />
-          <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(167,139,255,0.5),rgba(59,224,255,0.28)_55%,rgba(255,108,200,0.3))]" />
-          <div className="relative p-4">
-            <RarityTag rarity={activeEvent.rarity} />
-            <div className="mt-2.5 font-ui text-[19px] font-bold text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.5)]">{activeEvent.title}</div>
-            <div className="mt-2.5 flex gap-4">
-              <div className="flex items-center gap-1.5">
-                <Icon name="bolt" size={14} color="#fff" />
-                <span className="font-mono text-[11.5px] font-bold text-white">{activeEvent.xpMultiplier}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Icon name="clock" size={14} color="#fff" />
-                <span className="font-mono text-[11.5px] font-bold text-white">{activeEvent.timeLeft}</span>
+        {activeEvent && (
+          <>
+            <SectionTitle>Активный ивент</SectionTitle>
+            <div className="relative mt-2.5 overflow-hidden rounded-[18px] border border-sk-line/10">
+              <div className="stripes absolute inset-0" />
+              <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(167,139,255,0.5),rgba(59,224,255,0.28)_55%,rgba(255,108,200,0.3))]" />
+              <div className="relative p-4">
+                <RarityTag rarity={activeEvent.rarity} />
+                <div className="mt-2.5 font-ui text-[19px] font-bold text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.5)]">{activeEvent.title}</div>
+                <div className="mt-2.5 flex gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <Icon name="bolt" size={14} color="#fff" />
+                    <span className="font-mono text-[11.5px] font-bold text-white">{activeEvent.xpMultiplier}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Icon name="clock" size={14} color="#fff" />
+                    <span className="font-mono text-[11.5px] font-bold text-white">{activeEvent.timeLeft}</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
 
         <SectionTitle action={<button type="button" onClick={() => navigate('/quests')} className="font-mono text-[11px] text-sk-cyan">ВСЕ →</button>}>
           Активные квесты
         </SectionTitle>
+
         <div className="mt-2.5 flex flex-col gap-2.5">
           {quests.slice(0, 2).map((quest) => (
             <button key={quest.id} type="button" onClick={() => navigate('/quests')} className="glass rounded-2xl p-3.5 text-left active:scale-[0.99]">
@@ -104,8 +111,9 @@ export function HomePage() {
         <div className="mb-2.5 mt-5">
           <span className="font-ui text-[14.5px] font-semibold text-sk-text">Недавние награды</span>
         </div>
+
         <div className="flex flex-col gap-0.5">
-          {recentRewards.map((reward, index) => {
+          {recentRewards.map((reward) => {
             const color = rewardColor[reward.color];
 
             return (

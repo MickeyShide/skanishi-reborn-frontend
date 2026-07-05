@@ -325,7 +325,7 @@ export function MapPage() {
     startHeight: 0,
     startY: 0,
   });
-  const { mapPins, nearbyPoints, pointDetails } = useAppState();
+  const { mapPins, nearbyPoints, pointDetails, refreshMapPoints, selectScanPoint } = useAppState();
   const { ready, error: loaderError } = useYMapLoader();
   const [mapError, setMapError] = useState(null);
   const [selectedPointId, setSelectedPointId] = useState(null);
@@ -337,9 +337,16 @@ export function MapPage() {
 
   usePointerCapture(mapRef);
 
+  useEffect(() => {
+    refreshMapPoints().catch((error) => {
+      console.warn('[map] failed to refresh points', error);
+    });
+  }, [refreshMapPoints]);
+
   const handlePointSelect = useCallback((pointId) => {
     setSelectedPointId(pointId);
-  }, []);
+    selectScanPoint(pointId);
+  }, [selectScanPoint]);
 
   const getNearbySheetBounds = useCallback(() => {
     const shell = mapRef.current?.closest('.app-shell');
@@ -767,7 +774,17 @@ export function MapPage() {
         </div>
       </div>
 
-      <PointSheet point={selectedPoint} sheetRef={sheetRef} onClose={() => setSelectedPointId(null)} onScan={() => navigate('/scan')} />
+      <PointSheet
+        point={selectedPoint}
+        sheetRef={sheetRef}
+        onClose={() => setSelectedPointId(null)}
+        onScan={() => {
+          if (selectedPoint?.id) {
+            selectScanPoint(selectedPoint.id);
+            navigate('/scan', { state: { scanId: selectedPoint.id } });
+          }
+        }}
+      />
     </Screen>
   );
 }

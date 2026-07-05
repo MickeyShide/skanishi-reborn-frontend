@@ -45,19 +45,20 @@ function BackButtonBridge() {
 
 function ErrorScreen({ message }) {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAppState();
 
   return (
     <Screen>
       <div className="safe-page-x flex flex-1 flex-col justify-center gap-4">
         <EmptyState title="Ошибка синхронизации" text={message || 'Не удалось получить данные. Попробуй открыть приложение заново.'} />
-        <PrimaryButton onClick={() => navigate('/home')}>Повторить</PrimaryButton>
+        <PrimaryButton onClick={() => navigate(isAuthenticated ? '/home' : '/login')}>Повторить</PrimaryButton>
       </div>
     </Screen>
   );
 }
 
 function AppRoutes() {
-  const { isLoading, error } = useAppState();
+  const { isLoading, error, isAuthenticated } = useAppState();
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorScreen message={error} />;
@@ -67,16 +68,16 @@ function AppRoutes() {
       <BackButtonBridge />
       <Routes>
         <Route path="/" element={<SplashPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/map" element={<MapPage />} />
-        <Route path="/point/:pointId" element={<PointDetailPage />} />
-        <Route path="/scan" element={<ScanPage />} />
-        <Route path="/result" element={<ScanResultPage />} />
-        <Route path="/quests" element={<QuestsPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/xp" element={<XpHistoryPage />} />
-        <Route path="/achievements" element={<AchievementsPage />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/home" replace /> : <LoginPage />} />
+        <Route path="/home" element={isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />} />
+        <Route path="/map" element={isAuthenticated ? <MapPage /> : <Navigate to="/login" replace />} />
+        <Route path="/point/:pointId" element={isAuthenticated ? <PointDetailPage /> : <Navigate to="/login" replace />} />
+        <Route path="/scan" element={isAuthenticated ? <ScanPage /> : <Navigate to="/login" replace />} />
+        <Route path="/result" element={isAuthenticated ? <ScanResultPage /> : <Navigate to="/login" replace />} />
+        <Route path="/quests" element={isAuthenticated ? <QuestsPage /> : <Navigate to="/login" replace />} />
+        <Route path="/profile" element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />} />
+        <Route path="/xp" element={isAuthenticated ? <XpHistoryPage /> : <Navigate to="/login" replace />} />
+        <Route path="/achievements" element={isAuthenticated ? <AchievementsPage /> : <Navigate to="/login" replace />} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>

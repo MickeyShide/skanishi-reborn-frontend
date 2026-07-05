@@ -1,48 +1,102 @@
-import { createContext, useContext, useMemo, useReducer, useEffect } from 'react';
-import {
-  achievements,
-  activeEvent,
-  mapPins,
-  nearbyPoints,
-  pointDetails,
-  profileLinks,
-  quests,
-  recentRewards,
-  stats,
-  user,
-  xpHistoryGroups,
-} from '../data/mockData.js';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
+import { clearAccessToken, fetchAppState, fetchMapPoints, getTelegramInitData, loginWithTelegram, claimScanReward } from '../utils/api.js';
 
 const AppStateContext = createContext(null);
 
 const initialState = {
   isLoading: true,
+  isAuthenticating: false,
+  isAuthenticated: false,
   error: null,
+  authError: null,
+  isClaiming: false,
+  claimError: null,
+  lastClaimResult: null,
   rewardClaimed: false,
-  user,
-  activeEvent,
-  quests,
-  recentRewards,
-  mapPins,
-  nearbyPoints,
-  pointDetails,
-  stats,
-  profileLinks,
-  xpHistoryGroups,
-  achievements,
+  selectedScanId: null,
+  user: null,
+  activeEvent: null,
+  quests: [],
+  recentRewards: [],
+  mapPins: [],
+  nearbyPoints: [],
+  pointDetails: {},
+  stats: [],
+  profileLinks: [],
+  xpHistoryGroups: [],
+  achievements: [],
 };
 
 function reducer(state, action) {
   switch (action.type) {
     case 'loaded':
-      return { ...state, isLoading: false };
-    case 'failed':
-      return { ...state, isLoading: false, error: action.payload };
-    case 'claimReward':
       return {
         ...state,
+        ...action.payload,
+        isLoading: false,
+        isAuthenticating: false,
+        isAuthenticated: true,
+        error: null,
+        authError: null,
+      };
+    case 'authStart':
+      return {
+        ...state,
+        isAuthenticating: true,
+        authError: null,
+      };
+    case 'authRequired':
+      return {
+        ...state,
+        isLoading: false,
+        isAuthenticating: false,
+        isAuthenticated: false,
+        authError: action.payload,
+      };
+    case 'failed':
+      return { ...state, isLoading: false, error: action.payload };
+    case 'mapLoaded':
+      return {
+        ...state,
+        mapPins: action.payload.mapPins,
+        nearbyPoints: action.payload.nearbyPoints,
+        pointDetails: action.payload.pointDetails,
+      };
+    case 'selectScanPoint':
+      return {
+        ...state,
+        selectedScanId: action.payload,
+        rewardClaimed: false,
+        claimError: null,
+        lastClaimResult: null,
+      };
+    case 'claimStart':
+      return {
+        ...state,
+        isClaiming: true,
+        claimError: null,
+      };
+    case 'claimRewardSuccess':
+      return {
+        ...state,
+        isClaiming: false,
         rewardClaimed: true,
-        user: { ...state.user, xp: Math.min(state.user.nextLevelXp, state.user.xp + 250) },
+        claimError: null,
+        lastClaimResult: action.payload,
+        user: action.payload.user,
+      };
+    case 'claimRewardFailed':
+      return {
+        ...state,
+        isClaiming: false,
+        claimError: action.payload,
+      };
+    case 'clearClaimState':
+      return {
+        ...state,
+        rewardClaimed: false,
+        claimError: null,
+        lastClaimResult: null,
       };
     default:
       return state;
@@ -52,17 +106,113 @@ function reducer(state, action) {
 export function AppStateProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => dispatch({ type: 'loaded' }), 250);
-    return () => window.clearTimeout(timer);
+  const bootstrap = useCallback(async () => {
+    try {
+      const data = await fetchAppState();
+      dispatch({ type: 'loaded', payload: data });
+      return;
+    } catch (error) {
+      if (error?.status !== 401 && error?.status !== 403) {
+        dispatch({ type: 'failed', payload: error.message || 'Не удалось загрузить приложение.' });
+        return;
+      }
+    }
+
+    const initData = getTelegramInitData();
+
+    if (!initData) {
+      clearAccessToken();
+      dispatch({ type: 'authRequired', payload: null });
+      return;
+    }
+
+    try {
+      await loginWithTelegram(initData);
+      const data = await fetchAppState();
+      dispatch({ type: 'loaded', payload: data });
+    } catch (error) {
+      clearAccessToken();
+      dispatch({ type: 'authRequired', payload: error.message || 'Не удалось войти через Telegram.' });
+    }
   }, []);
+
+  useEffect(() => {
+    let canceled = false;
+
+    bootstrap().catch((error) => {
+      if (!canceled) {
+        dispatch({ type: 'failed', payload: error.message || 'Не удалось инициализировать приложение.' });
+      }
+    });
+
+    return () => {
+      canceled = true;
+    };
+  }, [bootstrap]);
+
+  const handleLogin = useCallback(async () => {
+    dispatch({ type: 'authStart' });
+
+    try {
+      await loginWithTelegram();
+      const data = await fetchAppState();
+      dispatch({ type: 'loaded', payload: data });
+      return data;
+    } catch (error) {
+      clearAccessToken();
+      dispatch({ type: 'authRequired', payload: error.message || 'Не удалось войти через Telegram.' });
+      throw error;
+    }
+  }, []);
+
+  const refreshMap = useCallback(async (params = {}) => {
+    const data = await fetchMapPoints(params);
+    dispatch({ type: 'mapLoaded', payload: data });
+    return data;
+  }, []);
+
+  const selectScanPoint = useCallback((scanId) => {
+    dispatch({ type: 'selectScanPoint', payload: scanId ?? null });
+  }, []);
+
+  const clearClaimState = useCallback(() => {
+    dispatch({ type: 'clearClaimState' });
+  }, []);
+
+  const handleClaimReward = useCallback(
+    async (scanId) => {
+      const targetScanId = scanId ?? state.selectedScanId;
+
+      if (!targetScanId) {
+        const error = new Error('Сначала выбери точку на карте.');
+        dispatch({ type: 'claimRewardFailed', payload: error.message });
+        throw error;
+      }
+
+      dispatch({ type: 'claimStart' });
+
+      try {
+        const res = await claimScanReward(targetScanId);
+        dispatch({ type: 'claimRewardSuccess', payload: res });
+        return res;
+      } catch (error) {
+        dispatch({ type: 'claimRewardFailed', payload: error.message || 'Не удалось забрать награду.' });
+        throw error;
+      }
+    },
+    [state.selectedScanId],
+  );
 
   const value = useMemo(
     () => ({
       ...state,
-      claimReward: () => dispatch({ type: 'claimReward' }),
+      loginWithTelegram: handleLogin,
+      refreshMapPoints: refreshMap,
+      selectScanPoint,
+      clearClaimState,
+      claimReward: handleClaimReward,
     }),
-    [state],
+    [clearClaimState, handleClaimReward, handleLogin, refreshMap, selectScanPoint, state],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

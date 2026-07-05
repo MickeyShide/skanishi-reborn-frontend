@@ -1,6 +1,8 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon.jsx';
 import { Screen } from '../components/ui.jsx';
+import { useAppState } from '../context/AppStateContext.jsx';
 
 function Corner({ position }) {
   const base = 'absolute h-[34px] w-[34px] border-[3px] border-sk-cyan drop-shadow-[0_0_6px_rgb(var(--color-cyan))]';
@@ -16,6 +18,20 @@ function Corner({ position }) {
 
 export function ScanPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedScanId, pointDetails, mapPins, selectScanPoint } = useAppState();
+  const activeScanId = location.state?.scanId ?? selectedScanId;
+
+  useEffect(() => {
+    if (location.state?.scanId) {
+      selectScanPoint(location.state.scanId);
+    }
+  }, [location.state, selectScanPoint]);
+
+  const selectedPoint = useMemo(() => {
+    if (!activeScanId) return null;
+    return pointDetails[activeScanId] ?? mapPins.find((point) => point.id === activeScanId) ?? null;
+  }, [activeScanId, mapPins, pointDetails]);
 
   return (
     <Screen glow={false}>
@@ -28,7 +44,7 @@ export function ScanPage() {
       <div className="safe-page-x relative z-[5] flex items-center justify-between pt-[calc(var(--safe-area-top)+56px)]">
         <button
           type="button"
-          onClick={() => navigate('/home')}
+          onClick={() => navigate(activeScanId ? '/map' : '/home')}
           aria-label="Закрыть сканер"
           className="glass flex h-[38px] w-[38px] items-center justify-center rounded-xl text-sk-text backdrop-blur-lg"
         >
@@ -56,8 +72,8 @@ export function ScanPage() {
       </div>
 
       <div className="absolute left-0 right-0 top-[calc(40%_+_140px)] text-center">
-        <div className="font-ui text-base font-semibold text-sk-text">Метка найдена</div>
-        <div className="mt-1 font-ui text-[13px] text-sk-text2">Удерживай в рамке для скана</div>
+        <div className="font-ui text-base font-semibold text-sk-text">{selectedPoint ? selectedPoint.name : 'Сначала выбери точку'}</div>
+        <div className="mt-1 font-ui text-[13px] text-sk-text2">{selectedPoint ? 'Удерживай метку в рамке для подтверждения скана' : 'Открой карту и выбери точку, для которой нужно отправить scan_id.'}</div>
       </div>
 
       <div className="absolute inset-x-0 bottom-0 z-[6] flex flex-col items-center gap-[18px] pb-[calc(var(--safe-area-bottom)+40px)]">
@@ -79,8 +95,8 @@ export function ScanPage() {
         </div>
         <button
           type="button"
-          onClick={() => navigate('/result')}
-          aria-label="Сканировать"
+          onClick={() => (activeScanId ? navigate('/result', { state: { scanId: activeScanId } }) : navigate('/map'))}
+          aria-label={activeScanId ? 'Сканировать' : 'Открыть карту'}
           className="holo flex h-[78px] w-[78px] rounded-full p-1 shadow-[0_0_30px_rgba(139,108,255,0.67)] active:scale-[0.98]"
           style={{ background: 'var(--gradient-primary)', backgroundSize: '180% 180%' }}
         >

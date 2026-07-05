@@ -1,9 +1,22 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Emblem, Wordmark } from '../components/Brand.jsx';
 import { Screen } from '../components/ui.jsx';
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate.js';
+import { useAppState } from '../context/AppStateContext.jsx';
 
 export function SplashPage() {
-  useDelayedNavigate('/login', 1150);
+  const navigate = useNavigate();
+  const { isLoading, isAuthenticated } = useAppState();
+
+  useEffect(() => {
+    if (isLoading) return undefined;
+
+    const timer = window.setTimeout(() => {
+      navigate(isAuthenticated ? '/home' : '/login', { replace: true });
+    }, 450);
+
+    return () => window.clearTimeout(timer);
+  }, [isAuthenticated, isLoading, navigate]);
 
   return (
     <Screen>
