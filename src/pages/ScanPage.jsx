@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon.jsx';
 import { Screen } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
@@ -18,20 +18,43 @@ function Corner({ position }) {
 
 export function ScanPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { selectedScanId, pointDetails, mapPins, selectScanPoint } = useAppState();
-  const activeScanId = location.state?.scanId ?? selectedScanId;
+  const { claimReward } = useAppState();
+  const [isLocalClaiming, setIsLocalClaiming] = useState(false);
 
-  useEffect(() => {
-    if (location.state?.scanId) {
-      selectScanPoint(location.state.scanId);
+  const handleSimulateScan = async () => {
+    if (isLocalClaiming) return;
+    
+    const webApp = window.Telegram?.WebApp;
+
+    if (webApp && webApp.showScanQrPopup) {
+      webApp.showScanQrPopup({ text: 'Наведите камеру на QR-код секрета' }, (token) => {
+        if (!token) return true;
+
+        setIsLocalClaiming(true);
+        claimReward(token)
+          .then(() => navigate('/result'))
+          .catch((err) => alert(err.message || 'Ошибка сканирования'))
+          .finally(() => setIsLocalClaiming(false));
+
+        return true; // closes the scanner
+      });
+      return;
     }
-  }, [location.state, selectScanPoint]);
 
-  const selectedPoint = useMemo(() => {
-    if (!activeScanId) return null;
-    return pointDetails[activeScanId] ?? mapPins.find((point) => point.id === activeScanId) ?? null;
-  }, [activeScanId, mapPins, pointDetails]);
+    // Fallback for local testing in browser
+    const token = window.prompt('Введите токен из QR-кода (имитация камеры):');
+    if (!token) return;
+    
+    setIsLocalClaiming(true);
+    try {
+      await claimReward(token);
+      navigate('/result');
+    } catch (err) {
+      alert(err.message || 'Ошибка сканирования');
+    } finally {
+      setIsLocalClaiming(false);
+    }
+  };
 
   return (
     <Screen glow={false}>
@@ -44,7 +67,7 @@ export function ScanPage() {
       <div className="safe-page-x relative z-[5] flex items-center justify-between pt-[calc(var(--safe-area-top)+56px)]">
         <button
           type="button"
-          onClick={() => navigate(activeScanId ? '/map' : '/home')}
+          onClick={() => navigate('/home')}
           aria-label="Закрыть сканер"
           className="glass flex h-[38px] w-[38px] items-center justify-center rounded-xl text-sk-text backdrop-blur-lg"
         >
@@ -52,7 +75,7 @@ export function ScanPage() {
         </button>
         <div className="flex items-center gap-2 rounded-full border border-sk-cyan/30 bg-sk-cyan/10 px-3 py-2 font-mono text-[11px] tracking-[2px] text-sk-cyan">
           <span className="dot h-1.5 w-1.5 rounded-full bg-sk-cyan shadow-[0_0_8px_rgb(var(--color-cyan))]" />
-          AR · ПОИСК
+          AR · СКАНЕР
         </div>
         <button type="button" className="glass flex h-[38px] w-[38px] items-center justify-center rounded-xl text-sk-text backdrop-blur-lg">
           <Icon name="bolt" size={19} color="rgb(var(--color-text))" />
@@ -72,8 +95,10 @@ export function ScanPage() {
       </div>
 
       <div className="absolute left-0 right-0 top-[calc(40%_+_140px)] text-center">
-        <div className="font-ui text-base font-semibold text-sk-text">{selectedPoint ? selectedPoint.name : 'Сначала выбери точку'}</div>
-        <div className="mt-1 font-ui text-[13px] text-sk-text2">{selectedPoint ? 'Удерживай метку в рамке для подтверждения скана' : 'Открой карту и выбери точку, для которой нужно отправить scan_id.'}</div>
+        <div className="font-ui text-base font-semibold text-sk-text">
+          {isLocalClaiming ? 'Анализ QR-кода...' : 'Наведите камеру на QR-код'}
+        </div>
+        <div className="mt-1 font-ui text-[13px] text-sk-text2">Расположите код в центре экрана,<br/>он отсканируется автоматически.</div>
       </div>
 
       <div className="absolute inset-x-0 bottom-0 z-[6] flex flex-col items-center gap-[18px] pb-[calc(var(--safe-area-bottom)+40px)]">
@@ -95,10 +120,10 @@ export function ScanPage() {
         </div>
         <button
           type="button"
-          onClick={() => (activeScanId ? navigate('/result', { state: { scanId: activeScanId } }) : navigate('/map'))}
-          aria-label={activeScanId ? 'Сканировать' : 'Открыть карту'}
+          onClick={handleSimulateScan}
+          aria-label="Имитировать сканирование"
           className="holo flex h-[78px] w-[78px] rounded-full p-1 shadow-[0_0_30px_rgba(139,108,255,0.67)] active:scale-[0.98]"
-          style={{ background: 'var(--gradient-primary)', backgroundSize: '180% 180%' }}
+          style={{ background: 'var(--gradient-primary)', backgroundSize: '180% 180%', opacity: isLocalClaiming ? 0.7 : 1 }}
         >
           <span className="flex h-full w-full items-center justify-center rounded-full border-2 border-white/20 bg-sk-bg">
             <Icon name="scan" size={32} color="rgb(var(--color-cyan))" sw={2} />

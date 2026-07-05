@@ -173,11 +173,11 @@ export async function fetchMapPoints(params = {}) {
   });
 }
 
-export async function claimScanReward(scanId) {
-  return apiRequest(`${API_BASE}/scan/claim`, {
+export async function collectItemBySecret(token) {
+  return apiRequest(`${API_BASE}/items/secret`, {
     method: 'POST',
-    body: { scan_id: scanId },
+    body: { token },
     csrf: true,
-    fallbackMessage: 'Не удалось забрать награду.',
+    fallbackMessage: 'Не удалось получить предмет по QR-коду.',
   });
 }

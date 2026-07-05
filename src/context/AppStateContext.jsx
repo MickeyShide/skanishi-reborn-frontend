@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
-import { clearAccessToken, fetchAppState, fetchMapPoints, getTelegramInitData, loginWithTelegram, claimScanReward } from '../utils/api.js';
+import { clearAccessToken, fetchAppState, fetchMapPoints, getTelegramInitData, loginWithTelegram, collectItemBySecret } from '../utils/api.js';
 
 const AppStateContext = createContext(null);
 
@@ -83,7 +83,6 @@ function reducer(state, action) {
         rewardClaimed: true,
         claimError: null,
         lastClaimResult: action.payload,
-        user: action.payload.user,
       };
     case 'claimRewardFailed':
       return {
@@ -179,12 +178,10 @@ export function AppStateProvider({ children }) {
     dispatch({ type: 'clearClaimState' });
   }, []);
 
-  const handleClaimReward = useCallback(
-    async (scanId) => {
-      const targetScanId = scanId ?? state.selectedScanId;
-
-      if (!targetScanId) {
-        const error = new Error('Сначала выбери точку на карте.');
+  const handleCollectItem = useCallback(
+    async (token) => {
+      if (!token) {
+        const error = new Error('Токен не передан.');
         dispatch({ type: 'claimRewardFailed', payload: error.message });
         throw error;
       }
@@ -192,15 +189,15 @@ export function AppStateProvider({ children }) {
       dispatch({ type: 'claimStart' });
 
       try {
-        const res = await claimScanReward(targetScanId);
+        const res = await collectItemBySecret(token);
         dispatch({ type: 'claimRewardSuccess', payload: res });
         return res;
       } catch (error) {
-        dispatch({ type: 'claimRewardFailed', payload: error.message || 'Не удалось забрать награду.' });
+        dispatch({ type: 'claimRewardFailed', payload: error.message || 'Не удалось получить предмет.' });
         throw error;
       }
     },
-    [state.selectedScanId],
+    [],
   );
 
   const value = useMemo(
@@ -210,9 +207,9 @@ export function AppStateProvider({ children }) {
       refreshMapPoints: refreshMap,
       selectScanPoint,
       clearClaimState,
-      claimReward: handleClaimReward,
+      claimReward: handleCollectItem,
     }),
-    [clearClaimState, handleClaimReward, handleLogin, refreshMap, selectScanPoint, state],
+    [clearClaimState, handleCollectItem, handleLogin, refreshMap, selectScanPoint, state],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

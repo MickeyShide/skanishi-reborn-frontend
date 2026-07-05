@@ -1,36 +1,18 @@
-import { useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon.jsx';
-import { GlassCard, PrimaryButton, RarityTag, Screen } from '../components/ui.jsx';
+import { PrimaryButton, RarityTag, Screen } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
 
 export function ScanResultPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { claimReward, rewardClaimed, isClaiming, claimError, lastClaimResult, selectedScanId, pointDetails, mapPins, selectScanPoint } = useAppState();
+  const { claimError, lastClaimResult, clearClaimState } = useAppState();
 
-  const activeScanId = location.state?.scanId ?? selectedScanId;
+  const item = lastClaimResult?.item;
+  const status = lastClaimResult?.status; // 'created' | 'already_collected'
 
-  useEffect(() => {
-    if (location.state?.scanId) {
-      selectScanPoint(location.state.scanId);
-    }
-  }, [location.state, selectScanPoint]);
-
-  const selectedPoint = useMemo(() => {
-    if (!activeScanId) return null;
-    return pointDetails[activeScanId] ?? mapPins.find((point) => point.id === activeScanId) ?? null;
-  }, [activeScanId, mapPins, pointDetails]);
-
-  const claimedXp = lastClaimResult?.xp ?? selectedPoint?.reward ?? 0;
-
-  const handleClaim = async () => {
-    try {
-      await claimReward(activeScanId);
-      navigate('/home');
-    } catch {
-      // Error is already shown from context state.
-    }
+  const handleClose = () => {
+    clearClaimState();
+    navigate('/home');
   };
 
   return (
@@ -46,44 +28,36 @@ export function ScanResultPage() {
 
         <div className="text-center">
           <div className="font-mono text-[11px] tracking-[3px] text-sk-cyan">СКАН УСПЕШЕН</div>
-          <div className="mt-2 font-mono text-[52px] font-bold leading-none text-sk-text [text-shadow:0_0_30px_rgb(var(--color-violet))]">
-            +{claimedXp}<span className="ml-1.5 text-[22px] text-sk-cyan">XP</span>
-          </div>
-          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-sk-gold/30 bg-sk-gold/10 px-3 py-1.5">
-            <Icon name="bolt" size={13} color="rgb(var(--color-gold))" />
-            <span className="font-mono text-[11px] font-bold text-sk-gold">×3 БОНУС ИВЕНТА</span>
+          <div className="mt-2 font-mono text-[28px] font-bold leading-tight text-sk-text [text-shadow:0_0_30px_rgb(var(--color-violet))]">
+            {status === 'already_collected' ? 'УЖЕ ПОЛУЧЕНО' : 'ПРЕДМЕТ НАЙДЕН'}
           </div>
         </div>
 
-        <div className="holo mt-[22px] rounded-card p-[1.5px]" style={{ background: 'var(--gradient-holo)', backgroundSize: '200% 200%' }}>
-          <div className="flex items-center gap-[15px] rounded-[18px] bg-[linear-gradient(135deg,#181426,#100d1a)] p-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-sk-pink/40 bg-sk-pink/15 shadow-[0_0_22px_rgba(255,108,200,0.5)]">
-              <Icon name="gem" size={36} color="rgb(var(--color-pink))" />
+        {item && (
+          <div className="holo mt-[22px] rounded-card p-[1.5px]" style={{ background: 'var(--gradient-holo)', backgroundSize: '200% 200%' }}>
+            <div className="flex items-center gap-[15px] rounded-[18px] bg-[linear-gradient(135deg,#181426,#100d1a)] p-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-sk-pink/40 bg-sk-pink/15 shadow-[0_0_22px_rgba(255,108,200,0.5)]">
+                {item.type?.photo_url ? (
+                  <img src={item.type.photo_url} alt="" className="h-10 w-10 object-contain" />
+                ) : (
+                  <Icon name="gem" size={36} color="rgb(var(--color-pink))" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <RarityTag rarity="mythic" />
+                <div className="mt-2 truncate font-ui text-[17px] font-bold text-sk-text">{item.title}</div>
+                <div className="mt-0.5 font-ui text-xs text-sk-text2">{item.category?.title || 'Секретный предмет'}</div>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <RarityTag rarity="mythic" />
-              <div className="mt-2 truncate font-ui text-[17px] font-bold text-sk-text">{selectedPoint?.name ?? 'Выбранная точка'}</div>
-              <div className="mt-0.5 font-ui text-xs text-sk-text2">{selectedPoint?.quest ?? 'Награда будет зачислена после подтверждения backend.'}</div>
-            </div>
           </div>
+        )}
+
+        {claimError && <div className="mt-6 text-center font-ui text-[14px] text-sk-pink">{claimError}</div>}
+
+        <div className="mt-8">
+          <PrimaryButton onClick={handleClose}>На главную</PrimaryButton>
         </div>
-
-        <GlassCard className="mt-3.5 p-3.5">
-          <div className="mb-2.5 flex items-center justify-between">
-            <span className="font-ui text-[13.5px] text-sk-text2">Квест «Тени Старого города»</span>
-            <span className="font-mono text-[11px] text-sk-cyan">4 / 5</span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-sk-surface/10">
-            <div className="h-full w-4/5 rounded-full" style={{ background: 'var(--gradient-primary)' }} />
-          </div>
-        </GlassCard>
-
-        {claimError && <div className="mt-3 text-center font-ui text-[12.5px] text-sk-pink">{claimError}</div>}
-
-        <div className="mt-5">
-          <PrimaryButton onClick={handleClaim}>{rewardClaimed ? 'Награда получена' : isClaiming ? 'Забираем…' : 'Забрать награду'}</PrimaryButton>
-        </div>
-        <button type="button" onClick={() => navigate('/scan')} className="mt-3.5 w-full text-center font-ui text-[13px] text-sk-text3">
+        <button type="button" onClick={() => { clearClaimState(); navigate('/scan'); }} className="mt-3.5 w-full text-center font-ui text-[13px] text-sk-text3">
           Сканировать ещё
         </button>
       </div>
