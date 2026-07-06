@@ -16,7 +16,7 @@ export function QrDeepLinkPage() {
     let rawSecret = webApp?.initDataUnsafe?.start_param || '';
 
     if (!rawSecret) {
-      const match = location.pathname.match(/\/qr\/(.+)/);
+      const match = location.pathname.match(/\/(?:qr|qrcode|t\.me(?:\/[^/]+\/[^/]+)?)\/(.+)/);
       if (match) {
         rawSecret = match[1];
       }

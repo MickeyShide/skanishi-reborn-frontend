@@ -78,6 +78,9 @@ function AppRoutes() {
         <Route path="/point/:pointId" element={<RequireAuth><PointDetailPage /></RequireAuth>} />
         <Route path="/qr" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
         <Route path="/qr/*" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
+        <Route path="/qrcode" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
+        <Route path="/qrcode/*" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
+        <Route path="/t.me/*" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
         <Route path="/result" element={<RequireAuth><ScanResultPage /></RequireAuth>} />
         <Route path="/quests" element={<RequireAuth><QuestsPage /></RequireAuth>} />
         <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
