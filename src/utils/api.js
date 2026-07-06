@@ -177,6 +177,20 @@ export async function fetchMapPoints(params = {}) {
   });
 }
 
+export async function fetchXpHistory(params = {}) {
+  return apiRequest(`${API_BASE}/xp/history`, {
+    query: params,
+    fallbackMessage: 'Не удалось загрузить историю XP.',
+  });
+}
+
+export async function fetchMyItems(params = {}) {
+  return apiRequest(`${API_BASE}/items/my`, {
+    query: params,
+    fallbackMessage: 'Не удалось загрузить инвентарь.',
+  });
+}
+
 export async function collectItemBySecret(token) {
   const secret = extractSecret(token);
   return apiRequest(`${API_BASE}/items/secret`, {

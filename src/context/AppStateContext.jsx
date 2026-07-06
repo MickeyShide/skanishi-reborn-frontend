@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
-import { clearAccessToken, fetchAppState, fetchMapPoints, getTelegramInitData, loginWithTelegram, collectItemBySecret } from '../utils/api.js';
+import { clearAccessToken, fetchAppState, fetchMapPoints, fetchXpHistory, getTelegramInitData, loginWithTelegram, collectItemBySecret } from '../utils/api.js';
 
 const AppStateContext = createContext(null);
 
@@ -24,6 +24,7 @@ const initialState = {
   stats: [],
   profileLinks: [],
   xpHistoryGroups: [],
+  xpWeekly: { total: 0, days: [0, 0, 0, 0, 0, 0, 0] },
   achievements: [],
 };
 
@@ -61,6 +62,12 @@ function reducer(state, action) {
         mapPins: action.payload.mapPins,
         nearbyPoints: action.payload.nearbyPoints,
         pointDetails: action.payload.pointDetails,
+      };
+    case 'xpHistoryLoaded':
+      return {
+        ...state,
+        xpHistoryGroups: action.payload.groups ?? [],
+        xpWeekly: action.payload.weekly ?? initialState.xpWeekly,
       };
     case 'selectScanPoint':
       return {
@@ -170,6 +177,12 @@ export function AppStateProvider({ children }) {
     return data;
   }, []);
 
+  const refreshXpHistory = useCallback(async (params = {}) => {
+    const data = await fetchXpHistory(params);
+    dispatch({ type: 'xpHistoryLoaded', payload: data });
+    return data;
+  }, []);
+
   const selectScanPoint = useCallback((scanId) => {
     dispatch({ type: 'selectScanPoint', payload: scanId ?? null });
   }, []);
@@ -205,11 +218,12 @@ export function AppStateProvider({ children }) {
       ...state,
       loginWithTelegram: handleLogin,
       refreshMapPoints: refreshMap,
+      refreshXpHistory,
       selectScanPoint,
       clearClaimState,
       claimReward: handleCollectItem,
     }),
-    [clearClaimState, handleCollectItem, handleLogin, refreshMap, selectScanPoint, state],
+    [clearClaimState, handleCollectItem, handleLogin, refreshMap, refreshXpHistory, selectScanPoint, state],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

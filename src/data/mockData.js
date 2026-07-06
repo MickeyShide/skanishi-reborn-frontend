@@ -94,8 +94,13 @@ export const stats = [
 export const profileLinks = [
   { icon: 'bolt', title: 'История XP', subtitle: '6 840 за сезон', color: 'cyan', to: '/xp' },
   { icon: 'trophy', title: 'Достижения', subtitle: '23 из 60', color: 'gold', to: '/achievements' },
-  { icon: 'gem', title: 'Инвентарь', subtitle: '41 предмет', color: 'violetHi', to: '/profile' },
+  { icon: 'gem', title: 'Инвентарь', subtitle: '41 предмет', color: 'violetHi', to: '/inventory' },
 ];
+
+export const xpWeekly = {
+  total: 2145,
+  days: [40, 62, 30, 80, 55, 95, 70],
+};
 
 export const xpHistoryGroups = [
   {

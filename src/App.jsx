@@ -9,6 +9,7 @@ import { MapPage } from './pages/MapPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { PointDetailPage } from './pages/PointDetailPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
+import { InventoryPage } from './pages/InventoryPage.jsx';
 import { QuestsPage } from './pages/QuestsPage.jsx';
 import { ScanResultPage } from './pages/ScanResultPage.jsx';
 import { SplashPage } from './pages/SplashPage.jsx';
@@ -20,6 +21,7 @@ const BACK_TARGETS = {
   '/result': '/home',
   '/xp': '/profile',
   '/achievements': '/profile',
+  '/inventory': '/profile',
 };
 
 function BackButtonBridge() {
@@ -92,6 +94,7 @@ function AppRoutes() {
         <Route path="/result" element={wrapAuth(<ScanResultPage />)} />
         <Route path="/quests" element={wrapAuth(<QuestsPage />)} />
         <Route path="/profile" element={wrapAuth(<ProfilePage />)} />
+        <Route path="/inventory" element={wrapAuth(<InventoryPage />)} />
         <Route path="/xp" element={wrapAuth(<XpHistoryPage />)} />
         <Route path="/achievements" element={wrapAuth(<AchievementsPage />)} />
         <Route path="/404" element={<NotFoundPage />} />

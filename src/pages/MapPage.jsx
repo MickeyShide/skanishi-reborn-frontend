@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon.jsx';
-import { GlassCard, PrimaryButton, RarityTag, Screen, TgHeader } from '../components/ui.jsx';
+import { GlassCard, RarityTag, Screen, TgHeader } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
 import { usePointerCapture } from '../hooks/usePointerCapture.js';
 import { useYMapLoader } from '../hooks/useYMapLoader.js';
 import { getRarityColor } from '../utils/format.js';
 
-const filters = ['Все', 'Не пройдено', 'Редкие', 'Секреты'];
+const filters = [
+  { id: 'all', label: 'Все', params: {} },
+  { id: 'todo', label: 'Не пройдено', params: { done: false } },
+  { id: 'rare', label: 'Редкие', params: { rarity: 'rare' } },
+  { id: 'secrets', label: 'Секреты', params: { category: 'Секрет' } },
+];
 const DEFAULT_CENTER = [37.618423, 55.751244];
 const POINT_ZOOM = 16;
 const POINT_ZOOM_DURATION = 900;
@@ -234,7 +238,7 @@ function buildPointFallback(point) {
   };
 }
 
-function PointSheet({ point, sheetRef, onClose, onScan }) {
+function PointSheet({ point, sheetRef, onClose }) {
   if (!point) return null;
 
   return (
@@ -286,7 +290,7 @@ function PointSheet({ point, sheetRef, onClose, onScan }) {
           </GlassCard>
         </div>
 
-        <button type="button" className="mt-3 flex w-full items-center gap-3 rounded-[14px] border border-sk-violetHi/20 bg-sk-violetHi/10 p-[13px] text-left active:scale-[0.99]">
+        <div className="mt-3 flex w-full items-center gap-3 rounded-[14px] border border-sk-violetHi/20 bg-sk-violetHi/10 p-[13px] text-left">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-sk-violetHi/20">
             <Icon name="quest" size={18} color="rgb(var(--color-violet-hi))" />
           </div>
@@ -294,16 +298,6 @@ function PointSheet({ point, sheetRef, onClose, onScan }) {
             <div className="font-mono text-[9.5px] tracking-[1px] text-sk-text3">КВЕСТ</div>
             <div className="mt-0.5 truncate font-ui text-sm font-semibold text-sk-text">{point.quest}</div>
           </div>
-          <Icon name="chev" size={18} color="rgb(var(--color-text3))" />
-        </button>
-
-        <div className="mt-[18px] flex gap-3">
-          <button type="button" className="glass flex h-[54px] w-14 shrink-0 items-center justify-center rounded-2xl">
-            <Icon name="route" size={22} color="rgb(var(--color-text))" />
-          </button>
-          <PrimaryButton onClick={onScan} icon={<Icon name="qr" size={20} color="rgb(var(--color-ink))" sw={2} />}>
-            Сканировать
-          </PrimaryButton>
         </div>
       </div>
     </div>
@@ -311,7 +305,6 @@ function PointSheet({ point, sheetRef, onClose, onScan }) {
 }
 
 export function MapPage() {
-  const navigate = useNavigate();
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const sheetRef = useRef(null);
@@ -327,6 +320,7 @@ export function MapPage() {
   });
   const { mapPins, nearbyPoints, pointDetails, refreshMapPoints, selectScanPoint } = useAppState();
   const { ready, error: loaderError } = useYMapLoader();
+  const [activeFilterId, setActiveFilterId] = useState('all');
   const [mapError, setMapError] = useState(null);
   const [selectedPointId, setSelectedPointId] = useState(null);
   const [sheetHeight, setSheetHeight] = useState(0);
@@ -335,13 +329,20 @@ export function MapPage() {
   const [nearbySheetMode, setNearbySheetMode] = useState('collapsed');
   const [nearbySheetDragging, setNearbySheetDragging] = useState(false);
 
+  const activeFilter = filters.find((filter) => filter.id === activeFilterId) ?? filters[0];
+
   usePointerCapture(mapRef);
 
   useEffect(() => {
-    refreshMapPoints().catch((error) => {
+    refreshMapPoints(activeFilter.params).catch((error) => {
       console.warn('[map] failed to refresh points', error);
     });
-  }, [refreshMapPoints]);
+  }, [activeFilter, refreshMapPoints]);
+
+  const handleFilterChange = useCallback((filterId) => {
+    setActiveFilterId(filterId);
+    setSelectedPointId(null);
+  }, []);
 
   const handlePointSelect = useCallback((pointId) => {
     setSelectedPointId(pointId);
@@ -701,34 +702,33 @@ export function MapPage() {
       {!selectedPoint && <TgHeader />}
 
       <div className={`noscroll safe-page-x inset-x-0 z-[6] flex gap-2 overflow-x-auto transition-opacity ${selectedPoint ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
-        {filters.map((filter, index) => (
+        {filters.map((filter) => {
+          const active = filter.id === activeFilterId;
+
+          return (
           <button
-            key={filter}
+            key={filter.id}
             type="button"
+            onClick={() => handleFilterChange(filter.id)}
             className="shrink-0 rounded-full border px-3.5 py-2 font-ui text-[12.5px]"
             style={{
-              color: index === 0 ? 'rgb(var(--color-ink))' : 'rgb(var(--color-text2))',
-              background: index === 0 ? 'rgb(var(--color-cyan))' : 'rgba(20,18,32,0.8)',
-              borderColor: index === 0 ? 'transparent' : 'rgb(var(--color-line) / 0.10)',
-              fontWeight: index === 0 ? 700 : 500,
+              color: active ? 'rgb(var(--color-ink))' : 'rgb(var(--color-text2))',
+              background: active ? 'rgb(var(--color-cyan))' : 'rgba(20,18,32,0.8)',
+              borderColor: active ? 'transparent' : 'rgb(var(--color-line) / 0.10)',
+              fontWeight: active ? 700 : 500,
               backdropFilter: 'blur(8px)',
             }}
           >
-            {filter}
+            {filter.label}
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <PointSheet
         point={selectedPoint}
         sheetRef={sheetRef}
         onClose={() => setSelectedPointId(null)}
-        onScan={() => {
-          if (selectedPoint?.id) {
-            selectScanPoint(selectedPoint.id);
-            navigate('/scan', { state: { scanId: selectedPoint.id } });
-          }
-        }}
       />
     </Screen>
   );

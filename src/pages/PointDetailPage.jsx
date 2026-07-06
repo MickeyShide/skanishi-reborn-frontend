@@ -96,7 +96,7 @@ export function PointDetailPage() {
           </GlassCard>
         </div>
 
-        <button type="button" className="mt-3 flex w-full items-center gap-3 rounded-[14px] border border-sk-violetHi/20 bg-sk-violetHi/10 p-[13px] text-left active:scale-[0.99]">
+        <button type="button" onClick={() => navigate('/quests')} className="mt-3 flex w-full items-center gap-3 rounded-[14px] border border-sk-violetHi/20 bg-sk-violetHi/10 p-[13px] text-left active:scale-[0.99]">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-sk-violetHi/20">
             <Icon name="quest" size={18} color="rgb(var(--color-violet-hi))" />
           </div>
