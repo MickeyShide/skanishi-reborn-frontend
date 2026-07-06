@@ -332,7 +332,7 @@ export function MapPage() {
   const [sheetHeight, setSheetHeight] = useState(0);
   const [nearbyDragHeight, setNearbyDragHeight] = useState(null);
   const [nearbySheetHeight, setNearbySheetHeight] = useState(0);
-  const [nearbySheetMode, setNearbySheetMode] = useState('expanded');
+  const [nearbySheetMode, setNearbySheetMode] = useState('collapsed');
   const [nearbySheetDragging, setNearbySheetDragging] = useState(false);
 
   usePointerCapture(mapRef);
@@ -577,8 +577,8 @@ export function MapPage() {
 
           const copyrights = root.querySelector('.ymaps3x0--map-copyrights, [class*="map-copyrights"]');
           if (copyrights instanceof HTMLElement) {
-            copyrights.style.bottom = '8px';
-            copyrights.style.opacity = '0.72';
+            copyrights.style.bottom = 'calc(var(--safe-area-bottom, 0px) + 106px)';
+            copyrights.style.opacity = '0.6';
           }
         };
 
@@ -698,9 +698,9 @@ export function MapPage() {
         <MapStatus ready={ready && !mapError} error={visibleMapError} />
       </div>
 
-      {!selectedPoint && <TgHeader title="Карта" sub={`${mapPoints.length} ТОЧЕК В РАДИУСЕ 1 КМ`} />}
+      {!selectedPoint && <TgHeader />}
 
-      <div className={`noscroll safe-page-x absolute inset-x-0 top-[calc(var(--safe-area-top)+116px)] z-[6] flex gap-2 overflow-x-auto transition-opacity ${selectedPoint ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
+      <div className={`noscroll safe-page-x inset-x-0 z-[6] flex gap-2 overflow-x-auto transition-opacity ${selectedPoint ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
         {filters.map((filter, index) => (
           <button
             key={filter}
@@ -717,61 +717,6 @@ export function MapPage() {
             {filter}
           </button>
         ))}
-      </div>
-
-      <div
-        ref={nearbySheetRef}
-        className={`absolute inset-x-0 bottom-0 z-[7] flex flex-col overflow-hidden rounded-t-[28px] border border-b-0 border-sk-line/20 bg-[linear-gradient(180deg,#14121f,#0c0a15)] shadow-[0_-16px_50px_rgba(0,0,0,0.55)] ${nearbySheetDragging ? '' : 'transition-[height,transform] duration-300 ease-out'} ${selectedPoint ? 'translate-y-full' : 'translate-y-0'}`}
-        style={{ height: nearbySheetHeightStyle }}
-      >
-        <button
-          type="button"
-          className="mx-auto mb-2 mt-3 flex h-5 w-20 touch-none items-center justify-center rounded-full"
-          aria-label={nearbySheetMode === 'expanded' ? 'Свернуть точки рядом' : 'Развернуть точки рядом'}
-          aria-expanded={nearbySheetMode === 'expanded'}
-          onKeyDown={handleNearbySheetKeyDown}
-          onPointerCancel={finishNearbySheetDrag}
-          onPointerDown={handleNearbySheetPointerDown}
-          onPointerMove={handleNearbySheetPointerMove}
-          onPointerUp={finishNearbySheetDrag}
-        >
-          <span className="h-[5px] w-11 rounded-full bg-white/20" />
-        </button>
-        <div className="flex items-center justify-between px-[18px] pb-2 pt-1">
-          <span className="font-ui text-[15px] font-semibold text-sk-text">Точки рядом</span>
-          <span className="font-mono text-[10.5px] text-sk-text3">ПО РАССТОЯНИЮ</span>
-        </div>
-        <div className={`noscroll flex-1 overflow-y-auto px-3.5 pb-[calc(88px+var(--safe-area-bottom))] transition-opacity duration-200 ${isNearbyCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
-          {nearbyPoints.map((point) => {
-            const color = getRarityColor(point.rarity);
-
-            return (
-              <button
-                key={point.id}
-                type="button"
-                onClick={() => handlePointSelect(point.id)}
-                className="flex w-full items-center gap-[13px] border-b border-sk-line/10 px-2 py-3 text-left last:border-b-0 active:scale-[0.99]"
-              >
-                <div
-                  className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[13px] border"
-                  style={{ color, background: `color-mix(in srgb, ${color} 10%, transparent)`, borderColor: `color-mix(in srgb, ${color} 25%, transparent)` }}
-                >
-                  <Icon name="map" size={20} color={color} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span className="truncate font-ui text-[14.5px] font-semibold text-sk-text">{point.name}</span>
-                    {point.done && <Icon name="check" size={14} color="rgb(var(--color-green))" sw={2.4} />}
-                  </div>
-                  <div className="mt-1 font-mono text-[10.5px] text-sk-text3">
-                    {point.category} · {point.distance}
-                  </div>
-                </div>
-                <RarityTag rarity={point.rarity} />
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       <PointSheet

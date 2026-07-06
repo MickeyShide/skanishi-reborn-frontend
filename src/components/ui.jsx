@@ -146,30 +146,11 @@ export function Avatar({ size = 44, ring, seed = 0 }) {
   );
 }
 
-export function TgHeader({ title, sub, right, back = false, onBack }) {
-  const navigate = useNavigate();
-  const handleBack = () => {
-    if (onBack) onBack();
-    else navigate(-1);
-  };
+export function TgHeader({ content }) {
 
   return (
-    <header className="safe-page-x relative z-[5] flex items-center gap-3 bg-gradient-to-b from-sk-bg2/95 to-sk-bg/0 pb-3 pt-[calc(var(--safe-area-top)+58px)]">
-      {back && (
-        <button
-          type="button"
-          onClick={handleBack}
-          aria-label="Назад"
-          className="glass flex h-[34px] w-[34px] shrink-0 scale-x-[-1] items-center justify-center rounded-[11px] text-sk-text2 active:scale-x-[-1] active:scale-y-95"
-        >
-          <Icon name="chev" size={18} />
-        </button>
-      )}
-      <div className="min-w-0 flex-1">
-        <div className="truncate font-ui text-lg font-semibold leading-tight text-sk-text">{title}</div>
-        {sub && <div className="mt-1 truncate font-mono text-[10.5px] tracking-[0.5px] text-sk-text3">{sub}</div>}
-      </div>
-      {right}
+    <header className="safe-page-x z-[5] flex items-center gap-3 pb-3 pt-[calc(var(--safe-area-top)+58px)]">
+      {content}
     </header>
   );
 }

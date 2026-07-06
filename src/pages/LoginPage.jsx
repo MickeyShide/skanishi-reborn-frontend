@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Emblem } from '../components/Brand.jsx';
 import { Icon } from '../components/Icon.jsx';
 import { Screen } from '../components/ui.jsx';
@@ -16,12 +16,15 @@ export function LoginPage() {
   const { loginWithTelegram, isAuthenticating, authError } = useAppState();
   const [localError, setLocalError] = useState('');
 
+  const location = useLocation();
+
   const handleLogin = async () => {
     setLocalError('');
 
     try {
       await loginWithTelegram();
-      navigate('/home', { replace: true });
+      const from = location.state?.from?.pathname || '/home';
+      navigate(from, { replace: true });
     } catch (error) {
       setLocalError(error.message || 'Не удалось войти через Telegram.');
     }

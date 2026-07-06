@@ -16,16 +16,7 @@ export function HomePage() {
 
   return (
     <Screen nav="home">
-      <TgHeader
-        title={`Привет, ${user.name}`}
-        sub={user.season}
-        right={
-          <button type="button" className="glass relative flex h-9 w-9 items-center justify-center rounded-xl text-sk-text2">
-            <Icon name="bell" size={19} color="rgb(var(--color-text2))" />
-            <span className="absolute right-[9px] top-2 h-[7px] w-[7px] rounded-full bg-sk-pink shadow-[0_0_6px_rgb(var(--color-pink))]" />
-          </button>
-        }
-      />
+      <TgHeader />
 
       <Body>
         <GlassCard glow="#8B6CFF">
@@ -33,19 +24,20 @@ export function HomePage() {
             <LevelRing level={user.level} pct={user.levelProgress} size={66} />
             <div className="min-w-0 flex-1">
               <div className="truncate font-ui text-lg font-bold text-sk-text">@{user.username}</div>
-              <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-lg border border-sk-gold/30 bg-sk-gold/10 px-2 py-1">
-                <Icon name="fire" size={13} color="rgb(var(--color-gold))" />
-                <span className="font-mono text-[10.5px] font-bold text-sk-gold">СТРИК {user.streakDays} ДН · ×1.5 XP</span>
-              </div>
             </div>
           </div>
 
           <div className="mt-3.5">
             <XPBar value={user.xp} max={user.nextLevelXp} />
           </div>
+
+          {/* <div className="mt-3.5 flex items-center justify-center gap-1.5 rounded-lg border border-sk-gold/30 bg-sk-gold/10 px-4 py-2">
+            <Icon name="fire" size={13} color="rgb(var(--color-gold))" />
+            <span className="font-mono text-[10.5px] font-bold text-sk-gold">СТРИК {user.streakDays} ДН · ×1.5 XP</span>
+          </div> */}
         </GlassCard>
 
-        <button
+        {/* <button
           type="button"
           onClick={() => navigate('/map')}
           className="holo mt-3.5 block w-full rounded-card p-0.5 text-left shadow-[0_0_30px_rgba(139,108,255,0.33)] active:scale-[0.99]"
@@ -61,7 +53,7 @@ export function HomePage() {
             </div>
             <Icon name="arrow" size={22} color="rgb(var(--color-text2))" />
           </div>
-        </button>
+        </button> */}
 
         {activeEvent && (
           <>

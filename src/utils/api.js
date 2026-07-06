@@ -58,7 +58,11 @@ export function clearAccessToken() {
 
 export function getTelegramInitData() {
   if (typeof window === 'undefined') return '';
-  return window.Telegram?.WebApp?.initData ?? '';
+  const data = window.Telegram?.WebApp?.initData;
+  if (!data && import.meta.env.DEV) {
+    return 'mock_local_data';
+  }
+  return data ?? '';
 }
 
 async function parseResponse(response, fallbackMessage) {
@@ -174,10 +178,30 @@ export async function fetchMapPoints(params = {}) {
 }
 
 export async function collectItemBySecret(token) {
+  const secret = extractSecret(token);
   return apiRequest(`${API_BASE}/items/secret`, {
     method: 'POST',
-    body: { token },
+    body: { token: secret },
     csrf: true,
     fallbackMessage: 'Не удалось получить предмет по QR-коду.',
   });
+}
+
+export function extractSecret(token) {
+  if (!token) return '';
+  const str = String(token).trim();
+
+  // match t.me/bot/app?startapp=SECRET
+  const startAppMatch = str.match(/[?&]startapp=([^&]+)/);
+  if (startAppMatch) return startAppMatch[1];
+  
+  // match t.me/bot/app/SECRET
+  const pathMatch = str.match(/t\.me\/[^/]+\/[^/]+\/([^/?]+)/);
+  if (pathMatch) return pathMatch[1];
+
+  // match https://domain/qr/SECRET
+  const directMatch = str.match(/\/qr\/([^/?]+)/);
+  if (directMatch) return directMatch[1];
+
+  return str;
 }

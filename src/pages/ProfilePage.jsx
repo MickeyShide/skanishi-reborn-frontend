@@ -16,17 +16,9 @@ export function ProfilePage() {
 
   return (
     <Screen nav="profile">
-      <TgHeader
-        title="Профиль"
-        sub={`ID ${user.id} · РАНГ ${user.rank}`}
-        right={
-          <button type="button" className="glass flex h-9 w-9 items-center justify-center rounded-xl text-sk-text2">
-            <Icon name="scan" size={18} color="rgb(var(--color-text2))" />
-          </button>
-        }
-      />
+      <TgHeader />
       <Body>
-        <div className="mt-1 flex flex-col items-center">
+        <div className="pt-2 flex flex-col items-center">
           <div className="relative">
             <div className="holo absolute -inset-1.5 rounded-full opacity-80 blur-[2px]" style={{ background: 'var(--gradient-holo)' }} />
             <div className="relative rounded-full bg-sk-bg p-[3px]">

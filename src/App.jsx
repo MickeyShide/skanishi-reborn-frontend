@@ -13,6 +13,7 @@ import { QuestsPage } from './pages/QuestsPage.jsx';
 import { ScanResultPage } from './pages/ScanResultPage.jsx';
 import { SplashPage } from './pages/SplashPage.jsx';
 import { XpHistoryPage } from './pages/XpHistoryPage.jsx';
+import { QrDeepLinkPage } from './pages/QrDeepLinkPage.jsx';
 import { EmptyState, LoadingState, PrimaryButton, Screen } from './components/ui.jsx';
 
 const BACK_TARGETS = {
@@ -57,9 +58,14 @@ function ErrorScreen({ message }) {
 
 function AppRoutes() {
   const { isLoading, error, isAuthenticated } = useAppState();
+  const location = useLocation();
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorScreen message={error} />;
+
+  const RequireAuth = ({ children }) => {
+    return isAuthenticated ? children : <Navigate to="/login" state={{ from: location }} replace />;
+  };
 
   return (
     <>
@@ -67,14 +73,16 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<SplashPage />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/home" replace /> : <LoginPage />} />
-        <Route path="/home" element={isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />} />
-        <Route path="/map" element={isAuthenticated ? <MapPage /> : <Navigate to="/login" replace />} />
-        <Route path="/point/:pointId" element={isAuthenticated ? <PointDetailPage /> : <Navigate to="/login" replace />} />
-        <Route path="/result" element={isAuthenticated ? <ScanResultPage /> : <Navigate to="/login" replace />} />
-        <Route path="/quests" element={isAuthenticated ? <QuestsPage /> : <Navigate to="/login" replace />} />
-        <Route path="/profile" element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />} />
-        <Route path="/xp" element={isAuthenticated ? <XpHistoryPage /> : <Navigate to="/login" replace />} />
-        <Route path="/achievements" element={isAuthenticated ? <AchievementsPage /> : <Navigate to="/login" replace />} />
+        <Route path="/home" element={<RequireAuth><HomePage /></RequireAuth>} />
+        <Route path="/map" element={<RequireAuth><MapPage /></RequireAuth>} />
+        <Route path="/point/:pointId" element={<RequireAuth><PointDetailPage /></RequireAuth>} />
+        <Route path="/qr" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
+        <Route path="/qr/*" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
+        <Route path="/result" element={<RequireAuth><ScanResultPage /></RequireAuth>} />
+        <Route path="/quests" element={<RequireAuth><QuestsPage /></RequireAuth>} />
+        <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+        <Route path="/xp" element={<RequireAuth><XpHistoryPage /></RequireAuth>} />
+        <Route path="/achievements" element={<RequireAuth><AchievementsPage /></RequireAuth>} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
