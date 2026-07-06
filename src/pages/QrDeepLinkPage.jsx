@@ -16,16 +16,23 @@ export function QrDeepLinkPage() {
     let rawSecret = webApp?.initDataUnsafe?.start_param || '';
 
     if (!rawSecret) {
-      const match = location.pathname.match(/\/(?:qr|qrcode|t\.me(?:\/[^/]+\/[^/]+)?)\/(.+)/);
+      // Grab everything after the initial matched path segments
+      const match = location.pathname.match(/\/(?:qr|qrcode|https?:\/+\/?t\.me(?:\/[^/]+\/[^/]+)?|t\.me(?:\/[^/]+\/[^/]+)?)\/(.+)/);
       if (match) {
         rawSecret = match[1];
+      }
+      
+      // Also check query string just in case it fell through to search
+      if (!rawSecret && location.search.includes('startapp=')) {
+        const urlParams = new URLSearchParams(location.search);
+        rawSecret = urlParams.get('startapp');
       }
     }
 
     const secret = extractSecret(rawSecret);
 
     if (!secret) {
-      if (!canceled) navigate('/home', { replace: true });
+      if (!canceled) navigate('/404', { replace: true });
       return;
     }
 

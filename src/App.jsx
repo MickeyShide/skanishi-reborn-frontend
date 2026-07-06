@@ -56,6 +56,10 @@ function ErrorScreen({ message }) {
   );
 }
 
+function RequireAuth({ children, location, isAuthenticated }) {
+  return isAuthenticated ? children : <Navigate to="/login" state={{ from: location }} replace />;
+}
+
 function AppRoutes() {
   const { isLoading, error, isAuthenticated } = useAppState();
   const location = useLocation();
@@ -63,9 +67,11 @@ function AppRoutes() {
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorScreen message={error} />;
 
-  const RequireAuth = ({ children }) => {
-    return isAuthenticated ? children : <Navigate to="/login" state={{ from: location }} replace />;
-  };
+  const wrapAuth = (element) => (
+    <RequireAuth isAuthenticated={isAuthenticated} location={location}>
+      {element}
+    </RequireAuth>
+  );
 
   return (
     <>
@@ -73,21 +79,23 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<SplashPage />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/home" replace /> : <LoginPage />} />
-        <Route path="/home" element={<RequireAuth><HomePage /></RequireAuth>} />
-        <Route path="/map" element={<RequireAuth><MapPage /></RequireAuth>} />
-        <Route path="/point/:pointId" element={<RequireAuth><PointDetailPage /></RequireAuth>} />
-        <Route path="/qr" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
-        <Route path="/qr/*" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
-        <Route path="/qrcode" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
-        <Route path="/qrcode/*" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
-        <Route path="/t.me/*" element={<RequireAuth><QrDeepLinkPage /></RequireAuth>} />
-        <Route path="/result" element={<RequireAuth><ScanResultPage /></RequireAuth>} />
-        <Route path="/quests" element={<RequireAuth><QuestsPage /></RequireAuth>} />
-        <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
-        <Route path="/xp" element={<RequireAuth><XpHistoryPage /></RequireAuth>} />
-        <Route path="/achievements" element={<RequireAuth><AchievementsPage /></RequireAuth>} />
+        <Route path="/home" element={wrapAuth(<HomePage />)} />
+        <Route path="/map" element={wrapAuth(<MapPage />)} />
+        <Route path="/point/:pointId" element={wrapAuth(<PointDetailPage />)} />
+        <Route path="/qr" element={wrapAuth(<QrDeepLinkPage />)} />
+        <Route path="/qr/*" element={wrapAuth(<QrDeepLinkPage />)} />
+        <Route path="/qrcode" element={wrapAuth(<QrDeepLinkPage />)} />
+        <Route path="/qrcode/*" element={wrapAuth(<QrDeepLinkPage />)} />
+        <Route path="/t.me/*" element={wrapAuth(<QrDeepLinkPage />)} />
+        <Route path="/http:/*" element={wrapAuth(<QrDeepLinkPage />)} />
+        <Route path="/https:/*" element={wrapAuth(<QrDeepLinkPage />)} />
+        <Route path="/result" element={wrapAuth(<ScanResultPage />)} />
+        <Route path="/quests" element={wrapAuth(<QuestsPage />)} />
+        <Route path="/profile" element={wrapAuth(<ProfilePage />)} />
+        <Route path="/xp" element={wrapAuth(<XpHistoryPage />)} />
+        <Route path="/achievements" element={wrapAuth(<AchievementsPage />)} />
         <Route path="/404" element={<NotFoundPage />} />
-        <Route path="*" element={<Navigate to="/404" replace />} />
+        <Route path="*" element={wrapAuth(<QrDeepLinkPage />)} />
       </Routes>
     </>
   );

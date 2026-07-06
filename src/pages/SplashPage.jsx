@@ -12,7 +12,13 @@ export function SplashPage() {
     if (isLoading) return undefined;
 
     const timer = window.setTimeout(() => {
-      navigate(isAuthenticated ? '/home' : '/login', { replace: true });
+      const startParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+      if (startParam) {
+        // If we launched with a telegram start parameter, route to deep link handler
+        navigate(`/qr/${startParam}`, { replace: true });
+      } else {
+        navigate(isAuthenticated ? '/home' : '/login', { replace: true });
+      }
     }, 450);
 
     return () => window.clearTimeout(timer);
