@@ -104,8 +104,12 @@ function AppRoutes() {
   );
 }
 
+import { useSSE } from './hooks/useSSE.js';
+import { ToastProvider } from './context/ToastContext.jsx';
+
 function AppShell() {
   useTelegram();
+  useSSE();
 
   return (
     <div className="app-shell">
@@ -118,7 +122,9 @@ export default function App() {
   return (
     <HashRouter>
       <AppStateProvider>
-        <AppShell />
+        <ToastProvider>
+          <AppShell />
+        </ToastProvider>
       </AppStateProvider>
     </HashRouter>
   );

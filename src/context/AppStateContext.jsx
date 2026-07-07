@@ -104,6 +104,23 @@ function reducer(state, action) {
         claimError: null,
         lastClaimResult: null,
       };
+    case 'sseXpGained':
+      return {
+        ...state,
+        user: state.user ? {
+          ...state.user,
+          xp: action.payload.new_total,
+          level: action.payload.level
+        } : null
+      };
+    case 'sseLevelUp':
+      return {
+        ...state,
+        user: state.user ? {
+          ...state.user,
+          level: action.payload.new_level
+        } : null
+      };
     default:
       return state;
   }
@@ -222,8 +239,9 @@ export function AppStateProvider({ children }) {
       selectScanPoint,
       clearClaimState,
       claimReward: handleCollectItem,
+      dispatch,
     }),
-    [clearClaimState, handleCollectItem, handleLogin, refreshMap, refreshXpHistory, selectScanPoint, state],
+    [clearClaimState, handleCollectItem, handleLogin, refreshMap, refreshXpHistory, selectScanPoint, state, dispatch],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
