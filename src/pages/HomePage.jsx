@@ -28,7 +28,11 @@ export function HomePage() {
           </div>
 
           <div className="mt-3.5">
-            <XPBar value={user.xp} max={user.nextLevelXp} />
+            <div className="mb-2.5 flex items-baseline justify-between">
+              <span className="font-ui text-[13.5px] text-sk-text2">До {user.level + 1} уровня</span>
+              <span className="font-mono text-xs text-sk-cyan">{formatNumber(user.nextLevelXp - user.xp)} XP</span>
+            </div>
+            <XPBar value={user.xp} max={user.nextLevelXp} showText={false} />
           </div>
 
           {/* <div className="mt-3.5 flex items-center justify-center gap-1.5 rounded-lg border border-sk-gold/30 bg-sk-gold/10 px-4 py-2">

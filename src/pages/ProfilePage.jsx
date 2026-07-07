@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon.jsx';
 import { Avatar, Body, GlassCard, Screen, TgHeader, XPBar } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
+import { formatNumber } from '../utils/format.js';
 
 const colorVar = {
   cyan: 'rgb(var(--color-cyan))',
@@ -37,8 +38,8 @@ export function ProfilePage() {
 
         <GlassCard className="mt-5">
           <div className="mb-2.5 flex items-baseline justify-between">
-            <span className="font-ui text-[13.5px] text-sk-text2">До 15 уровня</span>
-            <span className="font-mono text-xs text-sk-cyan">{user.nextLevelXp - user.xp} XP</span>
+            <span className="font-ui text-[13.5px] text-sk-text2">До {user.level + 1} уровня</span>
+            <span className="font-mono text-xs text-sk-cyan">{formatNumber(user.nextLevelXp - user.xp)} XP</span>
           </div>
           <XPBar value={user.xp} max={user.nextLevelXp} showText={false} />
           <div className="mt-2 flex justify-between font-mono text-[10.5px] text-sk-text3">
