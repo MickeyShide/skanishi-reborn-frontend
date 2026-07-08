@@ -51,9 +51,6 @@ jobs:
         with:
           context: .
           push: true
-          build-args: |
-            VITE_YMAP_API_KEY=${{ vars.VITE_YMAP_API_KEY }}
-            VITE_API_URL=${{ vars.VITE_API_URL }}
           tags: |
             ${{ steps.image.outputs.ref }}
             ${{ steps.image.outputs.name }}:latest
@@ -64,6 +61,8 @@ jobs:
           cat > .env.deploy <<'EOF'
           FRONTEND_IMAGE=${{ steps.image.outputs.ref }}
           FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
+          VITE_API_URL=${{ vars.VITE_API_URL }}
+          VITE_YMAP_API_KEY=${{ vars.VITE_YMAP_API_KEY }}
           EOF
 
       - name: Configure SSH

@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon.jsx';
 import { Avatar, Body, GlassCard, Screen, TgHeader, XPBar } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
+import { getPrivacySettings, logout, updatePrivacySettings } from '../utils/api.js';
 import { formatNumber } from '../utils/format.js';
 
 const colorVar = {
@@ -13,7 +15,49 @@ const colorVar = {
 
 export function ProfilePage() {
   const navigate = useNavigate();
-  const { user, stats, profileLinks } = useAppState();
+  const { user, stats, profileLinks, dispatch } = useAppState();
+  const [isPublic, setIsPublic] = useState(false);
+  const [isLoadingPrivacy, setIsLoadingPrivacy] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    getPrivacySettings()
+      .then((res) => {
+        if (mounted) {
+          setIsPublic(!res.privacy);
+          setIsLoadingPrivacy(false);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to load privacy settings', err);
+        if (mounted) setIsLoadingPrivacy(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handlePrivacyToggle = async () => {
+    const nextPublic = !isPublic;
+    setIsPublic(nextPublic); // Optimistic UI
+    try {
+      await updatePrivacySettings(!nextPublic); // Send 'privacy: true' when turning off public mode
+    } catch (err) {
+      console.error('Failed to update privacy', err);
+      setIsPublic(isPublic); // Rollback on error
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Logout error', err);
+    } finally {
+      dispatch({ type: 'logout' });
+      navigate('/');
+    }
+  };
 
   return (
     <Screen nav="profile">
@@ -84,6 +128,37 @@ export function ProfilePage() {
               </button>
             );
           })}
+        </div>
+
+        <div className="mt-6 flex flex-col gap-2.5">
+          <div className="px-4 font-mono text-[10px] tracking-[1px] text-sk-text3">НАСТРОЙКИ</div>
+          
+          <div className="glass flex items-center justify-between rounded-2xl p-4">
+            <div className="min-w-0 flex-1">
+              <div className="font-ui text-[15px] font-semibold text-sk-text">Публичный профиль</div>
+              <div className="mt-0.5 font-ui text-xs text-sk-text3">Показывать ваше имя в рейтинге</div>
+            </div>
+            {isLoadingPrivacy ? (
+              <div className="h-6 w-11 rounded-full bg-sk-line/10 animate-pulse" />
+            ) : (
+              <button
+                type="button"
+                onClick={handlePrivacyToggle}
+                className={`relative h-6 w-11 rounded-full transition-colors duration-300 ${isPublic ? 'bg-sk-cyan' : 'bg-sk-line/20'}`}
+              >
+                <div className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ${isPublic ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="glass flex items-center justify-center gap-2 rounded-2xl p-4 text-sk-pink active:scale-[0.99]"
+          >
+            <Icon name="logout" size={18} color="rgb(var(--color-pink))" />
+            <span className="font-ui text-[15px] font-bold">Выйти из аккаунта</span>
+          </button>
         </div>
       </Body>
     </Screen>

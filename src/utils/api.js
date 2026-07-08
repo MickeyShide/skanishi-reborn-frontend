@@ -1,4 +1,4 @@
-const BACKEND_URL = import.meta.env.VITE_API_URL || '';
+const BACKEND_URL = window.RUNTIME_CONFIG?.VITE_API_URL || import.meta.env.VITE_API_URL || '';
 const API_BASE = `${BACKEND_URL}/api/v1`;
 const ACCESS_TOKEN_KEY = 'skanishi_access_token';
 
@@ -37,7 +37,7 @@ function buildUrl(path, query) {
   return qs ? `${path}?${qs}` : path;
 }
 
-function getStoredAccessToken() {
+export function getStoredAccessToken() {
   if (typeof window === 'undefined') return '';
   return window.localStorage.getItem(ACCESS_TOKEN_KEY) ?? '';
 }
@@ -193,11 +193,36 @@ export async function fetchMyItems(params = {}) {
 
 export async function collectItemBySecret(token) {
   const secret = extractSecret(token);
-  return apiRequest(`${API_BASE}/items/secret`, {
+  return apiRequest(`${API_BASE}/scan/claim`, {
     method: 'POST',
     body: { token: secret },
     csrf: true,
     fallbackMessage: 'Не удалось получить предмет по QR-коду.',
+  });
+}
+
+export async function logout() {
+  const result = await apiRequest(`${API_BASE}/auth/logout`, {
+    method: 'POST',
+    csrf: true,
+    fallbackMessage: 'Не удалось выйти из аккаунта.',
+  });
+  clearAccessToken();
+  return result;
+}
+
+export async function getPrivacySettings() {
+  return apiRequest(`${API_BASE}/users/settings/privacy`, {
+    fallbackMessage: 'Не удалось загрузить настройки приватности.',
+  });
+}
+
+export async function updatePrivacySettings(privacy) {
+  return apiRequest(`${API_BASE}/users/settings/privacy`, {
+    method: 'PATCH',
+    body: { privacy },
+    csrf: true,
+    fallbackMessage: 'Не удалось обновить настройки приватности.',
   });
 }
 

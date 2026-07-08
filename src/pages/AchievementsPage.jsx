@@ -4,25 +4,29 @@ import { useAppState } from '../context/AppStateContext.jsx';
 import { getRarityColor } from '../utils/format.js';
 
 export function AchievementsPage() {
-  const { achievements } = useAppState();
+  const { achievements, achievementSummary, latestAchievement } = useAppState();
 
   return (
     <Screen>
-      <TgHeader title="Достижения" sub="РАЗБЛОКИРОВАНО 23 / 60" back />
+      <TgHeader title="Достижения" sub={`РАЗБЛОКИРОВАНО ${achievementSummary.unlocked} / ${achievementSummary.total}`} back />
       <Body pb="40px">
-        <div className="holo mb-4 rounded-card p-[1.5px]" style={{ background: 'var(--gradient-holo)', backgroundSize: '200% 200%' }}>
-          <div className="flex items-center gap-3.5 rounded-[18px] bg-[linear-gradient(135deg,#181426,#100d1a)] p-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-sk-gold/40 bg-sk-gold/15 shadow-[0_0_20px_rgba(255,192,97,0.4)]">
-              <Icon name="trophy" size={30} color="rgb(var(--color-gold))" />
+        {latestAchievement && (
+          <div className="holo mb-4 rounded-card p-[1.5px]" style={{ background: 'var(--gradient-holo)', backgroundSize: '200% 200%' }}>
+            <div className="flex items-center gap-3.5 rounded-[18px] bg-[linear-gradient(135deg,#181426,#100d1a)] p-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-sk-gold/40 bg-sk-gold/15 shadow-[0_0_20px_rgba(255,192,97,0.4)]">
+                <Icon name="trophy" size={30} color="rgb(var(--color-gold))" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-mono text-[9.5px] tracking-[1px] text-sk-gold">ПОСЛЕДНЕЕ</div>
+                <div className="mt-1 truncate font-ui text-[16.5px] font-bold text-sk-text">{latestAchievement.name}</div>
+                <div className="mt-0.5 font-ui text-xs text-sk-text2">{latestAchievement.description}</div>
+              </div>
+              {latestAchievement.xp > 0 && (
+                <span className="font-mono text-[13px] font-bold text-sk-gold">+{latestAchievement.xp}</span>
+              )}
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-mono text-[9.5px] tracking-[1px] text-sk-gold">ПОСЛЕДНЕЕ</div>
-              <div className="mt-1 truncate font-ui text-[16.5px] font-bold text-sk-text">Ночной охотник</div>
-              <div className="mt-0.5 font-ui text-xs text-sk-text2">10 сканов после полуночи</div>
-            </div>
-            <span className="font-mono text-[13px] font-bold text-sk-gold">+150</span>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-3 gap-2.5">
           {achievements.map((achievement) => {

@@ -54,6 +54,12 @@ export function ScanResultPage() {
             </div>
           </div>
         )}
+        
+        {lastClaimResult?.xp > 0 && status !== 'already_collected' && (
+          <div className="mt-4 text-center font-ui text-[16px] text-sk-cyan">
+            Получено: <span className="font-bold">+{lastClaimResult.xp} XP</span>
+          </div>
+        )}
 
         {claimError && <div className="mt-6 text-center font-ui text-[14px] text-sk-pink">{claimError}</div>}
 

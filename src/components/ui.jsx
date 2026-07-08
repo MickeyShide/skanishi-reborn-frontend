@@ -68,7 +68,8 @@ export function RarityTag({ rarity = 'rare', className = '' }) {
 }
 
 export function XPBar({ value, max, height = 8, showText = true }) {
-  const pct = Math.max(4, Math.min(100, (value / max) * 100));
+  const safeMax = max > 0 ? max : 1000;
+  const pct = Math.max(4, Math.min(100, (value / safeMax) * 100));
 
   return (
     <div className="w-full">

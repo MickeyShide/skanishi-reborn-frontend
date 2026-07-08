@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useAppState } from '../context/AppStateContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { getStoredAccessToken } from '../utils/api.js';
 
 export function useSSE() {
   const { isAuthenticated, dispatch } = useAppState();
@@ -17,7 +18,9 @@ export function useSSE() {
     }
 
     // Depending on deployment, API might be on a different origin. In Vite dev server it's proxied.
-    const eventSource = new EventSource('/api/v1/stream/events', {
+    const token = getStoredAccessToken();
+    const url = token ? `/api/v1/stream/events?token=${token}` : '/api/v1/stream/events';
+    const eventSource = new EventSource(url, {
       withCredentials: true,
     });
 

@@ -92,6 +92,12 @@ export function Icon({ name, size = 24, color = 'currentColor', sw = 1.8, classN
         <path {...p} d="M10 19a2 2 0 0 0 4 0" />
       </>
     ),
+    logout: (
+      <>
+        <path {...p} d="M10 22H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h5" />
+        <path {...p} d="M17 16l4-4-4-4M21 12H9" />
+      </>
+    ),
     tg: <path {...p} d="M21 5 3 12l5 2 2 5 3-4 5 4z" />,
   };
 

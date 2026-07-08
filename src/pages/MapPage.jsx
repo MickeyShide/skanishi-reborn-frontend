@@ -238,7 +238,7 @@ function buildPointFallback(point) {
   };
 }
 
-function PointSheet({ point, sheetRef, onClose }) {
+function PointSheet({ point, pointCoords, sheetRef, onClose }) {
   if (!point) return null;
 
   return (
@@ -299,6 +299,98 @@ function PointSheet({ point, sheetRef, onClose }) {
             <div className="mt-0.5 truncate font-ui text-sm font-semibold text-sk-text">{point.quest}</div>
           </div>
         </div>
+
+        {pointCoords && (
+          <div className="mt-4">
+            <a
+              href={`https://yandex.ru/maps/?pt=${pointCoords[0]},${pointCoords[1]}&z=18&l=map`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white/10 py-3.5 font-ui text-[15px] font-semibold text-sk-text transition-colors hover:bg-white/15 active:bg-white/20"
+            >
+              <Icon name="map" size={18} />
+              Маршрут
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NearbySheet({
+  points,
+  sheetRef,
+  onSelect,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onPointerCancel,
+  onKeyDown,
+  style,
+  isCollapsed,
+  hidden,
+  isDragging,
+}) {
+  if (hidden) return null;
+
+  return (
+    <div
+      ref={sheetRef}
+      className={`pointer-events-auto absolute inset-x-0 bottom-0 z-[40] flex flex-col rounded-t-[30px] border border-b-0 border-sk-line/20 bg-[linear-gradient(180deg,#16121f,#0c0a15)] px-5 shadow-[0_-20px_60px_rgba(0,0,0,0.6)] will-change-[height] ${isDragging ? '' : 'transition-[height] duration-300 ease-out'}`}
+      style={style}
+    >
+      <div
+        className="flex h-[34px] w-full shrink-0 touch-none items-center justify-center cursor-grab active:cursor-grabbing"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-label="Изменить размер списка"
+      >
+        <div className="h-[5px] w-11 rounded-full bg-white/20" />
+      </div>
+
+      <div className="flex shrink-0 items-center justify-between pb-3 pt-1">
+        <h2 className="font-ui text-[17px] font-bold text-sk-text">Рядом с вами</h2>
+        <span className="font-mono text-[11px] tracking-wider text-sk-text3">
+          {points.length} {points.length === 1 ? 'МЕСТО' : 'МЕСТА'}
+        </span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto pb-[calc(var(--safe-area-bottom)+110px)] hide-scrollbar">
+        {points.length === 0 ? (
+          <div className="mt-8 text-center font-ui text-[14px] text-sk-text3">
+            Рядом ничего нет. Попробуйте обновить локацию.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 pb-4">
+            {points.map((point) => (
+              <button
+                key={point.id}
+                type="button"
+                onClick={() => onSelect(point.id)}
+                className="flex items-center gap-3.5 rounded-[16px] border border-sk-line/10 bg-white/5 p-3 text-left transition-colors hover:bg-white/10 active:bg-white/15"
+              >
+                <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[12px] bg-sk-bg">
+                  <Icon name="gem" size={20} color={getRarityColor(point.rarity)} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <RarityTag rarity={point.rarity} className="!py-0.5 !px-1.5 !text-[9px]" />
+                    <span className="shrink-0 font-mono text-[10px] text-sk-text3">{point.distance}</span>
+                  </div>
+                  <div className="mt-1.5 truncate font-ui text-[14.5px] font-semibold text-sk-text">
+                    {point.name}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -329,15 +421,23 @@ export function MapPage() {
   const [nearbySheetMode, setNearbySheetMode] = useState('collapsed');
   const [nearbySheetDragging, setNearbySheetDragging] = useState(false);
 
+  const [userLocation, setUserLocation] = useState(null);
+
   const activeFilter = filters.find((filter) => filter.id === activeFilterId) ?? filters[0];
 
   usePointerCapture(mapRef);
 
   useEffect(() => {
-    refreshMapPoints(activeFilter.params).catch((error) => {
+    const filterParams = { ...activeFilter.params };
+    if (userLocation) {
+      filterParams.lat = userLocation[1];
+      filterParams.lon = userLocation[0];
+      filterParams.radius_meters = 2000;
+    }
+    refreshMapPoints(filterParams).catch((error) => {
       console.warn('[map] failed to refresh points', error);
     });
-  }, [activeFilter, refreshMapPoints]);
+  }, [activeFilter, userLocation, refreshMapPoints]);
 
   const handleFilterChange = useCallback((filterId) => {
     setActiveFilterId(filterId);
@@ -629,6 +729,7 @@ export function MapPage() {
           try {
             const location = await requestLocationViaHTML5();
             placeOrMoveUserMarker(location.longitude, location.latitude);
+            setUserLocation([location.longitude, location.latitude]);
             map.update({ location: { center: [location.longitude, location.latitude], zoom: 15, duration: 650, easing: 'ease-in-out' } });
           } catch (error) {
             console.warn('[ymaps] geolocation failed', error);
@@ -643,6 +744,7 @@ export function MapPage() {
             const location = await requestLocationViaHTML5();
             if (!canceled) {
               placeOrMoveUserMarker(location.longitude, location.latitude);
+              setUserLocation([location.longitude, location.latitude]);
               map.update({ location: { center: [location.longitude, location.latitude], zoom: 15, duration: 650, easing: 'ease-in-out' } });
             }
           } catch {
@@ -727,8 +829,24 @@ export function MapPage() {
 
       <PointSheet
         point={selectedPoint}
+        pointCoords={selectedMapPoint?.mapCoords}
         sheetRef={sheetRef}
         onClose={() => setSelectedPointId(null)}
+      />
+
+      <NearbySheet
+        points={nearbyPoints}
+        sheetRef={nearbySheetRef}
+        onSelect={handlePointSelect}
+        onPointerDown={handleNearbySheetPointerDown}
+        onPointerMove={handleNearbySheetPointerMove}
+        onPointerUp={finishNearbySheetDrag}
+        onPointerCancel={finishNearbySheetDrag}
+        onKeyDown={handleNearbySheetKeyDown}
+        style={{ height: nearbySheetHeightStyle }}
+        isCollapsed={isNearbyCollapsed}
+        hidden={!!selectedPoint}
+        isDragging={nearbySheetDragging}
       />
     </Screen>
   );

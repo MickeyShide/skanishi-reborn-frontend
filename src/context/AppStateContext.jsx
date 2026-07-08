@@ -26,6 +26,8 @@ const initialState = {
   xpHistoryGroups: [],
   xpWeekly: { total: 0, days: [0, 0, 0, 0, 0, 0, 0] },
   achievements: [],
+  achievementSummary: { unlocked: 0, total: 0 },
+  latestAchievement: null,
 };
 
 function reducer(state, action) {
@@ -90,6 +92,7 @@ function reducer(state, action) {
         rewardClaimed: true,
         claimError: null,
         lastClaimResult: action.payload,
+        user: action.payload.user || state.user,
       };
     case 'claimRewardFailed':
       return {
@@ -103,6 +106,14 @@ function reducer(state, action) {
         rewardClaimed: false,
         claimError: null,
         lastClaimResult: null,
+      };
+    case 'logout':
+      return {
+        ...initialState,
+        isLoading: false,
+        isAuthenticating: false,
+        isAuthenticated: false,
+        user: null,
       };
     case 'sseXpGained':
       return {
@@ -223,8 +234,17 @@ export function AppStateProvider({ children }) {
         dispatch({ type: 'claimRewardSuccess', payload: res });
         return res;
       } catch (error) {
-        dispatch({ type: 'claimRewardFailed', payload: error.message || 'Не удалось получить предмет.' });
-        throw error;
+        let msg = error.message || 'Не удалось получить предмет.';
+        const errCode = error.data?.error?.code || error.data?.detail?.code;
+        
+        if (errCode === 'reward_already_claimed') {
+          msg = 'Награда за этот скан уже получена!';
+        } else if (errCode === 'secret_not_found' || errCode === 'scan_not_found' || errCode === 'invalid_secret_token' || error.status === 404) {
+          msg = 'Квест завершен или секрет не найден.';
+        }
+        
+        dispatch({ type: 'claimRewardFailed', payload: msg });
+        throw new Error(msg);
       }
     },
     [],
