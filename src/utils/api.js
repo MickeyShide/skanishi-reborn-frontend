@@ -211,6 +211,62 @@ export async function logout() {
   return result;
 }
 
+export async function fetchDailyStatus() {
+  return apiRequest(`${API_BASE}/daily/status`, {
+    fallbackMessage: 'Не удалось загрузить статус ежедневной награды.',
+  });
+}
+
+export async function claimDailyReward() {
+  return apiRequest(`${API_BASE}/daily/claim`, {
+    method: 'POST',
+    csrf: true,
+    fallbackMessage: 'Не удалось получить ежедневную награду.',
+  });
+}
+
+export async function claimQuestReward(questId) {
+  return apiRequest(`${API_BASE}/quests/${questId}/claim`, {
+    method: 'POST',
+    csrf: true,
+    fallbackMessage: 'Не удалось получить награду за квест.',
+  });
+}
+
+export async function fetchCollections() {
+  return apiRequest(`${API_BASE}/collections`, {
+    fallbackMessage: 'Не удалось загрузить коллекции.',
+  });
+}
+
+export async function claimCollectionReward(collectionId) {
+  return apiRequest(`${API_BASE}/collections/${collectionId}/claim`, {
+    method: 'POST',
+    csrf: true,
+    fallbackMessage: 'Не удалось получить награду за коллекцию.',
+  });
+}
+
+export async function fetchEvents() {
+  return apiRequest(`${API_BASE}/events`, {
+    fallbackMessage: 'Не удалось загрузить ивенты.',
+  });
+}
+
+export async function claimEventGoalReward(eventId, goalId) {
+  return apiRequest(`${API_BASE}/events/${eventId}/goals/${goalId}/claim`, {
+    method: 'POST',
+    csrf: true,
+    fallbackMessage: 'Не удалось получить награду за цель ивента.',
+  });
+}
+
+export async function fetchLeaderboard(limit = 50, offset = 0) {
+  return apiRequest(`${API_BASE}/leaderboard?limit=${limit}&offset=${offset}`, {
+    fallbackMessage: 'Не удалось загрузить таблицу лидеров.',
+  });
+}
+
 export async function getPrivacySettings() {
   return apiRequest(`${API_BASE}/users/settings/privacy`, {
     fallbackMessage: 'Не удалось загрузить настройки приватности.',

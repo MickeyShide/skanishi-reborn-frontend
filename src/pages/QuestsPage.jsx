@@ -2,13 +2,34 @@ import { useState } from 'react';
 import { Icon } from '../components/Icon.jsx';
 import { Body, EmptyState, GlassCard, RarityTag, Screen, TgHeader } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
+import { claimQuestReward } from '../utils/api.js';
 
 export function QuestsPage() {
-  const { quests } = useAppState();
+  const { quests, refreshAppState } = useAppState();
   const [expandedQuestId, setExpandedQuestId] = useState(null);
+  const [claimingIds, setClaimingIds] = useState(new Set());
 
   const toggleQuest = (questId) => {
     setExpandedQuestId((current) => (current === questId ? null : questId));
+  };
+
+  const handleClaim = async (questId) => {
+    if (claimingIds.has(questId)) return;
+    
+    setClaimingIds((prev) => new Set([...prev, questId]));
+    try {
+      await claimQuestReward(questId);
+      // Toast notification for reward claimed here
+      refreshAppState();
+    } catch (err) {
+      console.error('Failed to claim quest:', err);
+    } finally {
+      setClaimingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(questId);
+        return next;
+      });
+    }
   };
 
   return (
@@ -53,14 +74,25 @@ export function QuestsPage() {
                       <Icon name="bolt" size={16} color="rgb(var(--color-gold))" />
                       <span className="font-mono text-sm font-bold text-sk-text">+{quest.xp} XP</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleQuest(quest.id)}
-                      aria-expanded={expanded}
-                      className="font-mono text-[11px] text-sk-cyan"
-                    >
-                      {expanded ? 'СВЕРНУТЬ' : 'ОТКРЫТЬ'}
-                    </button>
+                    {quest.progress >= 100 ? (
+                      <button
+                        type="button"
+                        onClick={() => handleClaim(quest.id)}
+                        disabled={claimingIds.has(quest.id)}
+                        className="rounded-lg bg-sk-cyan px-3 py-1.5 font-mono text-[11px] font-bold text-[#000]"
+                      >
+                        {claimingIds.has(quest.id) ? 'ЗАБИРАЕМ...' : 'ЗАБРАТЬ'}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => toggleQuest(quest.id)}
+                        aria-expanded={expanded}
+                        className="font-mono text-[11px] text-sk-cyan"
+                      >
+                        {expanded ? 'СВЕРНУТЬ' : 'ОТКРЫТЬ'}
+                      </button>
+                    )}
                   </div>
                 </GlassCard>
               );

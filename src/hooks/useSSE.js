@@ -36,6 +36,12 @@ export function useSSE() {
         } else if (data.type === 'level_up') {
           dispatch({ type: 'sseLevelUp', payload: data });
           showToast(`🎉 Новый уровень: ${data.new_level}!`, 'levelup', 6000);
+        } else if (data.type === 'quest_completed') {
+          showToast(`Квест выполнен: ${data.quest_name}!`, 'success', 5000);
+        } else if (data.type === 'achievement_unlocked') {
+          showToast(`🏆 Достижение: ${data.name}!`, 'levelup', 5000);
+        } else if (data.type === 'collection_completed') {
+          showToast(`Коллекция собрана: ${data.name}!`, 'success', 5000);
         }
       } catch (e) {
         console.error('Failed to parse SSE message', e);

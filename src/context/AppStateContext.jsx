@@ -250,18 +250,29 @@ export function AppStateProvider({ children }) {
     [],
   );
 
+  const refreshAppState = useCallback(async () => {
+    try {
+      const data = await fetchAppState();
+      dispatch({ type: 'loaded', payload: data });
+      return data;
+    } catch (error) {
+      console.error('Failed to refresh app state:', error);
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       ...state,
       loginWithTelegram: handleLogin,
       refreshMapPoints: refreshMap,
       refreshXpHistory,
+      refreshAppState,
       selectScanPoint,
       clearClaimState,
       claimReward: handleCollectItem,
       dispatch,
     }),
-    [clearClaimState, handleCollectItem, handleLogin, refreshMap, refreshXpHistory, selectScanPoint, state, dispatch],
+    [clearClaimState, handleCollectItem, handleLogin, refreshMap, refreshXpHistory, refreshAppState, selectScanPoint, state, dispatch],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

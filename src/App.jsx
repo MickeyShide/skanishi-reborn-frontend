@@ -10,6 +10,9 @@ import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { PointDetailPage } from './pages/PointDetailPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
 import { InventoryPage } from './pages/InventoryPage.jsx';
+import { LeaderboardPage } from './pages/LeaderboardPage.jsx';
+import { EventsPage } from './pages/EventsPage.jsx';
+import { CollectionsPage } from './pages/CollectionsPage.jsx';
 import { QuestsPage } from './pages/QuestsPage.jsx';
 import { ScanResultPage } from './pages/ScanResultPage.jsx';
 import { SplashPage } from './pages/SplashPage.jsx';
@@ -22,6 +25,9 @@ const BACK_TARGETS = {
   '/xp': '/profile',
   '/achievements': '/profile',
   '/inventory': '/profile',
+  '/collections': '/profile',
+  '/leaderboard': '/profile',
+  '/events': '/home',
 };
 
 function BackButtonBridge() {
@@ -93,8 +99,11 @@ function AppRoutes() {
         <Route path="/https:/*" element={wrapAuth(<QrDeepLinkPage />)} />
         <Route path="/result" element={wrapAuth(<ScanResultPage />)} />
         <Route path="/quests" element={wrapAuth(<QuestsPage />)} />
+        <Route path="/leaderboard" element={wrapAuth(<LeaderboardPage />)} />
+        <Route path="/events" element={wrapAuth(<EventsPage />)} />
         <Route path="/profile" element={wrapAuth(<ProfilePage />)} />
         <Route path="/inventory" element={wrapAuth(<InventoryPage />)} />
+        <Route path="/collections" element={wrapAuth(<CollectionsPage />)} />
         <Route path="/xp" element={wrapAuth(<XpHistoryPage />)} />
         <Route path="/achievements" element={wrapAuth(<AchievementsPage />)} />
         <Route path="/404" element={<NotFoundPage />} />

@@ -3,6 +3,7 @@ import { Icon } from '../components/Icon.jsx';
 import { Body, GlassCard, LevelRing, RarityTag, Screen, SectionTitle, TgHeader, XPBar } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
 import { formatNumber } from '../utils/format.js';
+import { DailyRewardWidget } from '../components/DailyRewardWidget.jsx';
 
 const rewardColor = {
   cyan: 'rgb(var(--color-cyan))',
@@ -41,6 +42,10 @@ export function HomePage() {
           </div> */}
         </GlassCard>
 
+        <div className="mt-4">
+          <DailyRewardWidget />
+        </div>
+
         {/* <button
           type="button"
           onClick={() => navigate('/map')}
@@ -61,8 +66,14 @@ export function HomePage() {
 
         {activeEvent && (
           <>
-            <SectionTitle>Активный ивент</SectionTitle>
-            <div className="relative mt-2.5 overflow-hidden rounded-[18px] border border-sk-line/10">
+            <SectionTitle action={<button type="button" onClick={() => navigate('/events')} className="font-mono text-[11px] text-sk-cyan">ПОДРОБНЕЕ →</button>}>
+              Активный ивент
+            </SectionTitle>
+            <button
+              type="button"
+              onClick={() => navigate('/events')}
+              className="relative mt-2.5 w-full overflow-hidden rounded-[18px] border border-sk-line/10 text-left active:scale-[0.99] transition-transform"
+            >
               <div className="stripes absolute inset-0" />
               <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(167,139,255,0.5),rgba(59,224,255,0.28)_55%,rgba(255,108,200,0.3))]" />
               <div className="relative p-4">
@@ -79,7 +90,7 @@ export function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           </>
         )}
 
