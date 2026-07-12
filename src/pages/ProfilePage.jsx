@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon.jsx';
 import { Avatar, Body, GlassCard, Screen, TgHeader, XPBar } from '../components/ui.jsx';
@@ -59,6 +59,19 @@ export function ProfilePage() {
     }
   };
 
+  const resolvedProfileLinks = useMemo(() => {
+    const existingTargets = new Set((profileLinks ?? []).map((link) => link.to));
+    const extraLinks = [
+      { icon: 'trophy', title: 'Рейтинг', subtitle: `Место: ${user?.rank ?? '-'}`, color: 'gold', to: '/leaderboard' },
+      { icon: 'user', title: 'Друзья', subtitle: 'Приглашай и получай XP', color: 'cyan', to: '/friends' },
+      { icon: 'gem', title: 'Магазин', subtitle: `${user?.coins ?? 0} коинов доступно`, color: 'pink', to: '/shop' },
+      { icon: 'layer', title: 'Коллекции', subtitle: 'Собранные наборы и награды', color: 'violetHi', to: '/collections' },
+      { icon: 'bolt', title: 'Мой Стикер (UGC)', subtitle: 'Пассивный доход от сканирований', color: 'cyan', to: '/ugc' },
+    ];
+
+    return [...(profileLinks ?? []), ...extraLinks.filter((link) => !existingTargets.has(link.to))];
+  }, [profileLinks, user?.coins, user?.rank]);
+
   return (
     <Screen nav="profile">
       <TgHeader />
@@ -104,7 +117,7 @@ export function ProfilePage() {
         </div>
 
         <div className="mt-4 flex flex-col gap-2.5">
-          {profileLinks.map((link) => {
+          {resolvedProfileLinks.map((link) => {
             const color = colorVar[link.color];
 
             return (

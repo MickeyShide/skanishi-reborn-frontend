@@ -98,35 +98,54 @@ function rgba(rgb, alpha) {
   return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
 }
 
-function buildHintFeatures(YMapFeature, centerLonLat, baseRadiusMeters) {
-  const rgb = [255, 108, 200];
-
-  return [3, 2, 1].map((step) => {
-    const factor = 0.35 + 0.65 * (step / 3);
-    const feature = new YMapFeature({
-      geometry: {
-        type: 'Polygon',
-        coordinates: circleToPolygonLonLat(centerLonLat, baseRadiusMeters * factor),
-      },
-      style: {
-        fill: rgba(rgb, 0.015 + 0.2 * Math.pow(step / 3, 2)),
-        stroke: [{ color: 'transparent', width: 0 }],
-      },
-    });
-
-    return { node: feature, radiusFactor: factor };
+function buildMaskedFeatures(YMapFeature, point) {
+  const rarityColors = {
+    common: '160, 160, 170',
+    rare: '15, 200, 255',
+    epic: '150, 70, 255',
+    legendary: '255, 180, 20',
+    mythic: '255, 70, 110',
+  };
+  const rgbStr = rarityColors[point.rarity] || rarityColors.common;
+  
+  return new YMapFeature({
+    id: `masked-${point.id}`,
+    geometry: {
+      type: 'Polygon',
+      coordinates: circleToPolygonLonLat(point.mapCoords, 50, 36),
+    },
+    style: {
+      fill: `rgba(${rgbStr}, 0.25)`,
+      stroke: [{ color: `rgba(${rgbStr}, 0.8)`, width: 2 }],
+    },
   });
 }
 
-function updateHintFeatures(layer, baseRadiusMeters) {
-  layer.features.forEach((feature) => {
-    feature.node.update({
-      geometry: {
-        type: 'Polygon',
-        coordinates: circleToPolygonLonLat(layer.center, baseRadiusMeters * feature.radiusFactor),
-      },
-    });
+function createMaskedMarkerElement(point, onSelect) {
+  const marker = document.createElement('button');
+  marker.type = 'button';
+  marker.className = 'ymap-masked-marker';
+  marker.dataset.mapInteractive = 'true';
+  marker.setAttribute('aria-label', point.name);
+  marker.style.width = '80px';
+  marker.style.height = '80px';
+  marker.style.transform = 'translate(-50%, -50%)';
+  marker.style.borderRadius = '50%';
+  marker.style.cursor = 'pointer';
+  marker.style.backgroundColor = 'transparent';
+  marker.style.border = 'none';
+  marker.style.outline = 'none';
+  marker.style.touchAction = 'none';
+
+  marker.addEventListener('pointerdown', (event) => event.stopPropagation());
+  marker.addEventListener('pointerup', (event) => event.stopPropagation());
+  marker.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onSelect(point.id);
   });
+
+  return marker;
 }
 
 function clamp(value, min, max) {
@@ -543,7 +562,6 @@ export function MapPage() {
         .filter((pin) => Boolean(pin.mapCoords)),
     [mapPins],
   );
-  const hintPoints = useMemo(() => mapPoints.filter((pin) => pin.hint), [mapPoints]);
   const initialCenter = useMemo(() => getCenter(mapPoints), [mapPoints]);
   const selectedMapPoint = useMemo(() => mapPoints.find((point) => point.id === selectedPointId) ?? null, [mapPoints, selectedPointId]);
   const selectedPoint = useMemo(() => {
@@ -687,26 +705,18 @@ export function MapPage() {
         mutationObserver = new MutationObserver(applyYandexChrome);
         mutationObserver.observe(mapRef.current, { childList: true, subtree: true });
 
-        const hintLayers = hintPoints.map((point) => {
-          const layer = {
-            center: point.mapCoords,
-            features: buildHintFeatures(YMapFeature, point.mapCoords, radiusForZoom(13.2)),
-          };
-
-          layer.features.forEach((feature) => map.addChild(feature.node));
-          return layer;
-        });
-
         mapPoints.forEach((point) => {
-          map.addChild(new YMapMarker({ coordinates: point.mapCoords }, createPointMarkerElement(point, handlePointSelect)));
+          if (point.is_masked) {
+            map.addChild(buildMaskedFeatures(YMapFeature, point));
+            map.addChild(new YMapMarker({ coordinates: point.mapCoords }, createMaskedMarkerElement(point, handlePointSelect)));
+          } else {
+            map.addChild(new YMapMarker({ coordinates: point.mapCoords }, createPointMarkerElement(point, handlePointSelect)));
+          }
         });
 
         listener = new YMapListener({
           onUpdate: ({ location }) => {
             if (typeof location?.zoom !== 'number') return;
-
-            const nextRadius = radiusForZoom(location.zoom);
-            hintLayers.forEach((layer) => updateHintFeatures(layer, nextRadius));
           },
         });
         map.addChild(listener);
@@ -777,7 +787,7 @@ export function MapPage() {
       }
       mapRef.current?.replaceChildren();
     };
-  }, [handlePointSelect, hintPoints, initialCenter, mapPoints, ready]);
+  }, [handlePointSelect, initialCenter, mapPoints, ready]);
 
   const visibleMapError = loaderError || mapError;
   const nearbySheetHeightStyle =

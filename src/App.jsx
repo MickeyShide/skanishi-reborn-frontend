@@ -20,6 +20,7 @@ import { ScanResultPage } from './pages/ScanResultPage.jsx';
 import { SplashPage } from './pages/SplashPage.jsx';
 import { XpHistoryPage } from './pages/XpHistoryPage.jsx';
 import { QrDeepLinkPage } from './pages/QrDeepLinkPage.jsx';
+import { UgcPage } from './pages/UgcPage.jsx';
 import { EmptyState, LoadingState, PrimaryButton, Screen } from './components/ui.jsx';
 
 const BACK_TARGETS = {
@@ -31,6 +32,7 @@ const BACK_TARGETS = {
   '/leaderboard': '/profile',
   '/friends': '/profile',
   '/shop': '/profile',
+  '/ugc': '/profile',
   '/events': '/home',
 };
 
@@ -112,6 +114,7 @@ function AppRoutes() {
         <Route path="/collections" element={wrapAuth(<CollectionsPage />)} />
         <Route path="/xp" element={wrapAuth(<XpHistoryPage />)} />
         <Route path="/achievements" element={wrapAuth(<AchievementsPage />)} />
+        <Route path="/ugc" element={wrapAuth(<UgcPage />)} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={wrapAuth(<QrDeepLinkPage />)} />
       </Routes>
@@ -134,6 +137,7 @@ function AppShell() {
 }
 
 export default function App() {
+  console.log('App loaded - Vite HMR trigger');
   return (
     <HashRouter>
       <AppStateProvider>

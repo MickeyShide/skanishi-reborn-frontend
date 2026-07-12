@@ -34,6 +34,26 @@ export function Icon({ name, size = 24, color = 'currentColor', sw = 1.8, classN
         <path {...p} d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" />
       </>
     ),
+    profile: (
+      <>
+        <circle {...p} cx="12" cy="8" r="3.5" />
+        <path {...p} d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" />
+      </>
+    ),
+    coin: (
+      <>
+        <circle {...p} cx="12" cy="12" r="8" />
+        <path {...p} d="M12 8v8M9 12h6" />
+      </>
+    ),
+    fragment: (
+      <>
+        <polygon {...p} points="12 2 22 8 22 16 12 22 2 16 2 8" />
+        <path {...p} d="M12 22V12" />
+        <path {...p} d="M12 12l10-4" />
+        <path {...p} d="M2 8l10 4" />
+      </>
+    ),
     bolt: <path {...p} d="M13 2 4 14h7l-1 8 9-12h-7z" />,
     trophy: (
       <>
@@ -70,6 +90,13 @@ export function Icon({ name, size = 24, color = 'currentColor', sw = 1.8, classN
         <path {...p} d="M3 8h18M9 3 7.5 8 12 21M15 3l1.5 5L12 21" />
       </>
     ),
+    layer: (
+      <>
+        <path {...p} d="M12 4 4 8l8 4 8-4-8-4Z" />
+        <path {...p} d="M4 12l8 4 8-4" />
+        <path {...p} d="M4 16l8 4 8-4" />
+      </>
+    ),
     plus: (
       <>
         <path {...p} d="M12 5v14M5 12h14" />
@@ -98,6 +125,13 @@ export function Icon({ name, size = 24, color = 'currentColor', sw = 1.8, classN
         <path {...p} d="M17 16l4-4-4-4M21 12H9" />
       </>
     ),
+    spinner: (
+      <>
+        <path {...p} d="M12 4a8 8 0 1 1-5.66 2.34" />
+      </>
+    ),
+    'chev-up': <path {...p} d="M6 15l6-6 6 6" />,
+    'chev-down': <path {...p} d="M6 9l6 6 6-6" />,
     tg: <path {...p} d="M21 5 3 12l5 2 2 5 3-4 5 4z" />,
   };
 

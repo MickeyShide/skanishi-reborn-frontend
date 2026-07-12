@@ -30,11 +30,36 @@ export function ScanResultPage() {
         <div className="mx-auto mb-[18px] h-[5px] w-11 rounded-full bg-white/20" />
 
         <div className="text-center">
-          <div className="font-mono text-[11px] tracking-[3px] text-sk-cyan">СКАН УСПЕШЕН</div>
-          <div className="mt-2 font-mono text-[28px] font-bold leading-tight text-sk-text [text-shadow:0_0_30px_rgb(var(--color-violet))]">
-            {status === 'already_collected' ? 'УЖЕ ПОЛУЧЕНО' : 'ПРЕДМЕТ НАЙДЕН'}
-          </div>
+          {claimError === 'QR_ON_COOLDOWN' ? (
+            <>
+              <div className="font-mono text-[11px] tracking-[3px] text-sk-violetHi">ОШИБКА</div>
+              <div className="mt-2 font-mono text-[28px] font-bold leading-tight text-sk-text [text-shadow:0_0_30px_rgb(var(--color-pink))]">
+                ТОЧКА НА КУЛДАУНЕ
+              </div>
+            </>
+          ) : claimError ? (
+            <>
+              <div className="font-mono text-[11px] tracking-[3px] text-sk-pink">ОШИБКА</div>
+              <div className="mt-2 font-mono text-[28px] font-bold leading-tight text-sk-text [text-shadow:0_0_30px_rgb(var(--color-pink))]">
+                СБОЙ СКАНА
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="font-mono text-[11px] tracking-[3px] text-sk-cyan">СКАН УСПЕШЕН</div>
+              <div className="mt-2 font-mono text-[28px] font-bold leading-tight text-sk-text [text-shadow:0_0_30px_rgb(var(--color-violet))]">
+                {status === 'already_collected' ? 'УЖЕ ПОЛУЧЕНО' : 'ПРЕДМЕТ НАЙДЕН'}
+              </div>
+            </>
+          )}
         </div>
+
+        {lastClaimResult?.is_first_blood && (
+          <div className="mx-auto mt-4 mb-2 flex w-max items-center gap-1.5 rounded-full border border-sk-gold/40 bg-[linear-gradient(90deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))] px-3 py-1 text-sk-gold shadow-[0_0_15px_rgba(255,215,0,0.3)] animate-pulse">
+            <Icon name="star" size={14} color="currentColor" />
+            <span className="font-ui text-[12px] font-bold uppercase tracking-wider">Первооткрыватель</span>
+          </div>
+        )}
 
         {item && (
           <div className="holo mt-[22px] rounded-card p-[1.5px]" style={{ background: 'var(--gradient-holo)', backgroundSize: '200% 200%' }}>
@@ -55,13 +80,37 @@ export function ScanResultPage() {
           </div>
         )}
         
-        {lastClaimResult?.xp > 0 && status !== 'already_collected' && (
-          <div className="mt-4 text-center font-ui text-[16px] text-sk-cyan">
-            Получено: <span className="font-bold">+{lastClaimResult.xp} XP</span>
+        {lastClaimResult?.rewards?.length > 0 && status !== 'already_collected' && (
+          <div className="mt-6 flex flex-col gap-2">
+            {lastClaimResult.rewards.map((reward, i) => (
+              <div key={i} className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 animate-sheetIn" style={{ animationDelay: `${i * 150}ms`, animationFillMode: 'both' }}>
+                <div className="flex items-center gap-3">
+                  {reward.type === 'xp' ? (
+                    <Icon name="bolt" size={24} color="rgb(var(--color-cyan))" />
+                  ) : reward.type === 'coin' ? (
+                    <Icon name="coin" size={24} color="rgb(var(--color-gold))" />
+                  ) : (
+                    <Icon name="fragment" size={24} color="rgb(var(--color-pink))" />
+                  )}
+                  <span className="font-ui text-[15px] font-semibold text-sk-text">{reward.name}</span>
+                </div>
+                <span className="font-mono text-[16px] font-bold" style={{ color: reward.type === 'xp' ? 'rgb(var(--color-cyan))' : reward.type === 'coin' ? 'rgb(var(--color-gold))' : 'rgb(var(--color-pink))' }}>
+                  +{reward.amount}
+                </span>
+              </div>
+            ))}
           </div>
         )}
 
-        {claimError && <div className="mt-6 text-center font-ui text-[14px] text-sk-pink">{claimError}</div>}
+        {claimError === 'QR_ON_COOLDOWN' && (
+          <div className="mt-6 text-center font-ui text-[14px] text-sk-text2">
+            Кто-то уже отсканировал этот код. Он восстановится в течение 24 часов!
+          </div>
+        )}
+        
+        {claimError && claimError !== 'QR_ON_COOLDOWN' && (
+          <div className="mt-6 text-center font-ui text-[14px] text-sk-pink">{claimError}</div>
+        )}
 
         <div className="mt-8">
           <PrimaryButton onClick={handleClose}>На главную</PrimaryButton>

@@ -32,9 +32,11 @@ export function ScanPage() {
 
         setIsLocalClaiming(true);
         claimReward(token)
-          .then(() => navigate('/result'))
-          .catch((err) => alert(err.message || 'Ошибка сканирования'))
-          .finally(() => setIsLocalClaiming(false));
+          .catch(() => {})
+          .finally(() => {
+            setIsLocalClaiming(false);
+            navigate('/result');
+          });
 
         return true; // closes the scanner
       });
@@ -48,11 +50,11 @@ export function ScanPage() {
     setIsLocalClaiming(true);
     try {
       await claimReward(token);
-      navigate('/result');
     } catch (err) {
-      alert(err.message || 'Ошибка сканирования');
+      // error handled in context
     } finally {
       setIsLocalClaiming(false);
+      navigate('/result');
     }
   };
 

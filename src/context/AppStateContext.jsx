@@ -239,6 +239,8 @@ export function AppStateProvider({ children }) {
         
         if (errCode === 'reward_already_claimed') {
           msg = 'Награда за этот скан уже получена!';
+        } else if (error.data?.detail === 'QR_ON_COOLDOWN') {
+          msg = 'QR_ON_COOLDOWN';
         } else if (errCode === 'secret_not_found' || errCode === 'scan_not_found' || errCode === 'invalid_secret_token' || error.status === 404) {
           msg = 'Квест завершен или секрет не найден.';
         }

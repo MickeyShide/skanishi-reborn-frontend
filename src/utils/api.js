@@ -293,6 +293,13 @@ export async function equipShopItem(itemId) {
   });
 }
 
+export async function craftShopItem(itemId) {
+  return apiRequest(`${API_BASE}/shop/${itemId}/craft`, {
+    method: 'POST',
+    fallbackMessage: 'Ошибка при крафте.',
+  });
+}
+
 export async function getPrivacySettings() {
   return apiRequest(`${API_BASE}/users/settings/privacy`, {
     fallbackMessage: 'Не удалось загрузить настройки приватности.',
@@ -305,6 +312,19 @@ export async function updatePrivacySettings(privacy) {
     body: { privacy },
     csrf: true,
     fallbackMessage: 'Не удалось обновить настройки приватности.',
+  });
+}
+
+export async function fetchMySticker() {
+  return apiRequest(`${API_BASE}/ugc/me`, {
+    fallbackMessage: 'Не удалось загрузить UGC стикер.',
+  });
+}
+
+export async function generateSticker() {
+  return apiRequest(`${API_BASE}/ugc/generate`, {
+    method: 'POST',
+    fallbackMessage: 'Не удалось сгенерировать стикер.',
   });
 }
 

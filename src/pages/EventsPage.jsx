@@ -52,6 +52,13 @@ export function EventsPage() {
     setExpandedId((curr) => (curr === id ? null : id));
   };
 
+  const formatGoalTitle = (goal, index) => {
+    if (goal.description) return goal.description;
+    if (goal.target_count) return `Цель: ${goal.target_count} действий`;
+    if (goal.target_value) return `Цель: ${goal.target_value} очков прогресса`;
+    return `Цель ${index + 1}`;
+  };
+
   return (
     <Screen nav="home">
       <TgHeader title="Ивенты" sub="ОГРАНИЧЕННЫЕ ПО ВРЕМЕНИ СОБЫТИЯ" />
@@ -116,13 +123,15 @@ export function EventsPage() {
                         {event.goals.map((goal) => {
                           const claimKey = `${event.id}-${goal.id}`;
                           const isClaiming = claimingIds.has(claimKey);
-                          const canClaim = goal.progress >= goal.target_count && !goal.reward_claimed;
-                          const progressPct = Math.min(100, Math.round((goal.progress / goal.target_count) * 100));
+                          const targetValue = goal.target_count ?? goal.target_value ?? 0;
+                          const progressValue = goal.progress ?? goal.current_value ?? 0;
+                          const canClaim = Boolean(goal.is_completed) && !goal.reward_claimed;
+                          const progressPct = targetValue > 0 ? Math.min(100, Math.round((progressValue / targetValue) * 100)) : 0;
 
                           return (
                             <GlassCard key={goal.id} className="p-3 shadow-none">
-                              <div className="font-ui text-sm font-semibold">{goal.description}</div>
-                              <div className="mt-1 font-mono text-[10px] text-sk-text3">ПРОГРЕСС: {goal.progress} / {goal.target_count}</div>
+                              <div className="font-ui text-sm font-semibold">{formatGoalTitle(goal, event.goals.indexOf(goal))}</div>
+                              <div className="mt-1 font-mono text-[10px] text-sk-text3">ПРОГРЕСС: {progressValue} / {targetValue}</div>
                               
                               <div className="mt-3 flex items-center gap-3">
                                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-sk-surface/20">
