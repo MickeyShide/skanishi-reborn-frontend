@@ -11,6 +11,8 @@ import { PointDetailPage } from './pages/PointDetailPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
 import { InventoryPage } from './pages/InventoryPage.jsx';
 import { LeaderboardPage } from './pages/LeaderboardPage.jsx';
+import { FriendsPage } from './pages/FriendsPage.jsx';
+import { ShopPage } from './pages/ShopPage.jsx';
 import { EventsPage } from './pages/EventsPage.jsx';
 import { CollectionsPage } from './pages/CollectionsPage.jsx';
 import { QuestsPage } from './pages/QuestsPage.jsx';
@@ -27,6 +29,8 @@ const BACK_TARGETS = {
   '/inventory': '/profile',
   '/collections': '/profile',
   '/leaderboard': '/profile',
+  '/friends': '/profile',
+  '/shop': '/profile',
   '/events': '/home',
 };
 
@@ -100,6 +104,8 @@ function AppRoutes() {
         <Route path="/result" element={wrapAuth(<ScanResultPage />)} />
         <Route path="/quests" element={wrapAuth(<QuestsPage />)} />
         <Route path="/leaderboard" element={wrapAuth(<LeaderboardPage />)} />
+        <Route path="/friends" element={wrapAuth(<FriendsPage />)} />
+        <Route path="/shop" element={wrapAuth(<ShopPage />)} />
         <Route path="/events" element={wrapAuth(<EventsPage />)} />
         <Route path="/profile" element={wrapAuth(<ProfilePage />)} />
         <Route path="/inventory" element={wrapAuth(<InventoryPage />)} />

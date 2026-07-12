@@ -267,6 +267,32 @@ export async function fetchLeaderboard(limit = 50, offset = 0) {
   });
 }
 
+export async function fetchReferrals() {
+  return apiRequest(`${API_BASE}/referrals/me`, {
+    fallbackMessage: 'Не удалось загрузить список рефералов.',
+  });
+}
+
+export async function fetchShop() {
+  return apiRequest(`${API_BASE}/shop`, {
+    fallbackMessage: 'Не удалось загрузить магазин.',
+  });
+}
+
+export async function buyShopItem(itemId) {
+  return apiRequest(`${API_BASE}/shop/${itemId}/buy`, {
+    method: 'POST',
+    fallbackMessage: 'Ошибка при покупке.',
+  });
+}
+
+export async function equipShopItem(itemId) {
+  return apiRequest(`${API_BASE}/shop/${itemId}/equip`, {
+    method: 'POST',
+    fallbackMessage: 'Ошибка при экипировке.',
+  });
+}
+
 export async function getPrivacySettings() {
   return apiRequest(`${API_BASE}/users/settings/privacy`, {
     fallbackMessage: 'Не удалось загрузить настройки приватности.',
