@@ -4,9 +4,7 @@ import { AppStateProvider, useAppState } from './context/AppStateContext.jsx';
 import { useTelegram, useTelegramBackButton } from './hooks/useTelegram.js';
 import { AchievementsPage } from './pages/AchievementsPage.jsx';
 import { HomePage } from './pages/HomePage.jsx';
-import { LoginPage } from './pages/LoginPage.jsx';
 import { MapPage } from './pages/MapPage.jsx';
-import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { PointDetailPage } from './pages/PointDetailPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
 import { InventoryPage } from './pages/InventoryPage.jsx';
@@ -56,33 +54,36 @@ function BackButtonBridge() {
   return null;
 }
 
-function ErrorScreen({ message }) {
+function ErrorScreen({ message, restartRequired = false }) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppState();
 
   return (
     <Screen>
       <div className="safe-page-x flex flex-1 flex-col justify-center gap-4">
-        <EmptyState title="Ошибка синхронизации" text={message || 'Не удалось получить данные. Попробуй открыть приложение заново.'} />
-        <PrimaryButton onClick={() => navigate(isAuthenticated ? '/home' : '/login')}>Повторить</PrimaryButton>
+        <EmptyState
+          title={restartRequired ? 'Перезапустите приложение' : 'Ошибка синхронизации'}
+          text={message || 'Не удалось получить данные. Попробуйте открыть приложение заново.'}
+        />
+        {!restartRequired && <PrimaryButton onClick={() => navigate(isAuthenticated ? '/home' : '/')}>Повторить</PrimaryButton>}
       </div>
     </Screen>
   );
 }
 
-function RequireAuth({ children, location, isAuthenticated }) {
-  return isAuthenticated ? children : <Navigate to="/login" state={{ from: location }} replace />;
+function RequireAuth({ children, isAuthenticated }) {
+  return isAuthenticated ? children : <Navigate to="/" replace />;
 }
 
 function AppRoutes() {
-  const { isLoading, error, isAuthenticated } = useAppState();
-  const location = useLocation();
+  const { isLoading, error, authError, isAuthenticated } = useAppState();
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorScreen message={error} />;
+  if (!isAuthenticated) return <ErrorScreen message={authError} restartRequired />;
 
   const wrapAuth = (element) => (
-    <RequireAuth isAuthenticated={isAuthenticated} location={location}>
+    <RequireAuth isAuthenticated={isAuthenticated}>
       {element}
     </RequireAuth>
   );
@@ -92,7 +93,7 @@ function AppRoutes() {
       <BackButtonBridge />
       <Routes>
         <Route path="/" element={<SplashPage />} />
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/home" replace /> : <LoginPage />} />
+        <Route path="/login" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={wrapAuth(<HomePage />)} />
         <Route path="/map" element={wrapAuth(<MapPage />)} />
         <Route path="/point/:pointId" element={wrapAuth(<PointDetailPage />)} />
@@ -115,8 +116,8 @@ function AppRoutes() {
         <Route path="/xp" element={wrapAuth(<XpHistoryPage />)} />
         <Route path="/achievements" element={wrapAuth(<AchievementsPage />)} />
         <Route path="/ugc" element={wrapAuth(<UgcPage />)} />
-        <Route path="/404" element={<NotFoundPage />} />
-        <Route path="*" element={wrapAuth(<QrDeepLinkPage />)} />
+        <Route path="/404" element={<Navigate to="/home" replace />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </>
   );

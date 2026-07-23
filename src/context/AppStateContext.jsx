@@ -30,6 +30,16 @@ const initialState = {
   latestAchievement: null,
 };
 
+function getTelegramAuthErrorMessage(error) {
+  const code = error?.data?.error?.code || error?.data?.detail?.code;
+
+  if (['init_data_replay_detected', 'expired_init_data', 'invalid_init_data'].includes(code)) {
+    return 'Перезапустите приложение в Telegram и попробуйте снова.';
+  }
+
+  return 'Не удалось подтвердить вход через Telegram. Перезапустите приложение.';
+}
+
 function reducer(state, action) {
   switch (action.type) {
     case 'loaded':
@@ -156,7 +166,7 @@ export function AppStateProvider({ children }) {
 
     if (!initData) {
       clearAccessToken();
-      dispatch({ type: 'authRequired', payload: null });
+      dispatch({ type: 'authRequired', payload: 'Откройте приложение через Telegram.' });
       return;
     }
 
@@ -166,7 +176,7 @@ export function AppStateProvider({ children }) {
       dispatch({ type: 'loaded', payload: data });
     } catch (error) {
       clearAccessToken();
-      dispatch({ type: 'authRequired', payload: error.message || 'Не удалось войти через Telegram.' });
+      dispatch({ type: 'authRequired', payload: getTelegramAuthErrorMessage(error) });
     }
   }, []);
 
@@ -194,7 +204,7 @@ export function AppStateProvider({ children }) {
       return data;
     } catch (error) {
       clearAccessToken();
-      dispatch({ type: 'authRequired', payload: error.message || 'Не удалось войти через Telegram.' });
+      dispatch({ type: 'authRequired', payload: getTelegramAuthErrorMessage(error) });
       throw error;
     }
   }, []);
