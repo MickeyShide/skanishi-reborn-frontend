@@ -3,6 +3,7 @@ import { Icon } from '../components/Icon.jsx';
 import { Body, EmptyState, GlassCard, RarityTag, Screen, TgHeader } from '../components/ui.jsx';
 import { fetchCollections, claimCollectionReward } from '../utils/api.js';
 import { useAppState } from '../context/AppStateContext.jsx';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 export function CollectionsPage() {
   const { refreshAppState } = useAppState();
@@ -138,4 +139,8 @@ export function CollectionsPage() {
       </Body>
     </Screen>
   );
+}
+
+export default function CollectionsPageStandalone(props) {
+  return <StandalonePage><CollectionsPage {...props} /></StandalonePage>;
 }

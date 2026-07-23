@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon.jsx';
 import { Screen } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 function Corner({ position }) {
   const base = 'absolute h-[34px] w-[34px] border-[3px] border-sk-cyan drop-shadow-[0_0_6px_rgb(var(--color-cyan))]';
@@ -134,4 +135,8 @@ export function ScanPage() {
       </div>
     </Screen>
   );
+}
+
+export default function ScanPageStandalone(props) {
+  return <StandalonePage><ScanPage {...props} /></StandalonePage>;
 }

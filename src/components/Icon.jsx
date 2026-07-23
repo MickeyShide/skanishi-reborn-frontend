@@ -141,3 +141,5 @@ export function Icon({ name, size = 24, color = 'currentColor', sw = 1.8, classN
     </svg>
   );
 }
+
+export default Icon;

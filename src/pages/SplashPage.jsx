@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Emblem, Wordmark } from '../components/Brand.jsx';
 import { Screen } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 export function SplashPage() {
   const navigate = useNavigate();
@@ -40,4 +41,8 @@ export function SplashPage() {
       </div>
     </Screen>
   );
+}
+
+export default function SplashPageStandalone(props) {
+  return <StandalonePage><SplashPage {...props} /></StandalonePage>;
 }

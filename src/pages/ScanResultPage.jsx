@@ -4,6 +4,7 @@ import { PrimaryButton, RarityTag, Screen } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
 
 import { useScanner } from '../hooks/useScanner.js';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 export function ScanResultPage() {
   const navigate = useNavigate();
@@ -124,4 +125,8 @@ export function ScanResultPage() {
       </div>
     </Screen>
   );
+}
+
+export default function ScanResultPageStandalone(props) {
+  return <StandalonePage><ScanResultPage {...props} /></StandalonePage>;
 }

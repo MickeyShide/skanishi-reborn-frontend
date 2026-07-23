@@ -5,6 +5,7 @@ import { useAppState } from '../context/AppStateContext.jsx';
 import { usePointerCapture } from '../hooks/usePointerCapture.js';
 import { useYMapLoader } from '../hooks/useYMapLoader.js';
 import { getRarityColor } from '../utils/format.js';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 const filters = [
   { id: 'all', label: 'Все', params: {} },
@@ -860,4 +861,8 @@ export function MapPage() {
       />
     </Screen>
   );
+}
+
+export default function MapPageStandalone(props) {
+  return <StandalonePage><MapPage {...props} /></StandalonePage>;
 }

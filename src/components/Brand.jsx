@@ -63,3 +63,19 @@ export function Wordmark({ size = 26, sub }) {
     </div>
   );
 }
+
+export default function Brand({ className = '', size = 84 }) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 84 84"
+      role="img"
+      aria-label="Skanshi"
+    >
+      <polygon points="42,2 78,23 78,61 42,82 6,61 6,23" fill="none" stroke="currentColor" strokeWidth="3" />
+      <path d="M25 42h34M42 25v34" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}

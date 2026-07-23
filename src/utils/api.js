@@ -282,6 +282,7 @@ export async function fetchShop() {
 export async function buyShopItem(itemId) {
   return apiRequest(`${API_BASE}/shop/${itemId}/buy`, {
     method: 'POST',
+    csrf: true,
     fallbackMessage: 'Ошибка при покупке.',
   });
 }
@@ -289,6 +290,7 @@ export async function buyShopItem(itemId) {
 export async function equipShopItem(itemId) {
   return apiRequest(`${API_BASE}/shop/${itemId}/equip`, {
     method: 'POST',
+    csrf: true,
     fallbackMessage: 'Ошибка при экипировке.',
   });
 }
@@ -296,6 +298,7 @@ export async function equipShopItem(itemId) {
 export async function craftShopItem(itemId) {
   return apiRequest(`${API_BASE}/shop/${itemId}/craft`, {
     method: 'POST',
+    csrf: true,
     fallbackMessage: 'Ошибка при крафте.',
   });
 }
@@ -324,6 +327,7 @@ export async function fetchMySticker() {
 export async function generateSticker() {
   return apiRequest(`${API_BASE}/ugc/generate`, {
     method: 'POST',
+    csrf: true,
     fallbackMessage: 'Не удалось сгенерировать стикер.',
   });
 }

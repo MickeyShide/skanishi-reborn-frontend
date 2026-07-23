@@ -4,6 +4,7 @@ import { Body, GlassCard, LevelRing, RarityTag, Screen, SectionTitle, TgHeader, 
 import { useAppState } from '../context/AppStateContext.jsx';
 import { formatNumber } from '../utils/format.js';
 import { DailyRewardWidget } from '../components/DailyRewardWidget.jsx';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 const rewardColor = {
   cyan: 'rgb(var(--color-cyan))',
@@ -148,4 +149,8 @@ export function HomePage() {
       </Body>
     </Screen>
   );
+}
+
+export default function HomePageStandalone(props) {
+  return <StandalonePage><HomePage {...props} /></StandalonePage>;
 }

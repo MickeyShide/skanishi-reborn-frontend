@@ -294,3 +294,16 @@ export function EmptyState({ title = 'Пока пусто', text = 'Здесь �
 export function paletteText(color) {
   return paletteClass[color] ?? 'text-sk-text';
 }
+
+export function Button({ children, variant = 'primary', className = '', ...props }) {
+  const variantClass = variant === 'danger' ? 'bg-red-500 text-white' : '';
+  return <button className={cn(variantClass, className)} {...props}>{children}</button>;
+}
+
+export function Card({ children, className = '', ...props }) {
+  return <GlassCard className={className} {...props}>{children}</GlassCard>;
+}
+
+export function Badge({ children, status, className = '', ...props }) {
+  return <span className={cn('inline-flex items-center gap-1 rounded px-2 py-1', className)} {...props}>{children}</span>;
+}

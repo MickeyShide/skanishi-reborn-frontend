@@ -5,6 +5,7 @@ import { Avatar, Body, GlassCard, Screen, TgHeader, XPBar } from '../components/
 import { useAppState } from '../context/AppStateContext.jsx';
 import { getPrivacySettings, logout, updatePrivacySettings } from '../utils/api.js';
 import { formatNumber } from '../utils/format.js';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 const colorVar = {
   cyan: 'rgb(var(--color-cyan))',
@@ -176,4 +177,8 @@ export function ProfilePage() {
       </Body>
     </Screen>
   );
+}
+
+export default function ProfilePageStandalone(props) {
+  return <StandalonePage><ProfilePage {...props} /></StandalonePage>;
 }

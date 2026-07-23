@@ -3,7 +3,29 @@ import { fetchDailyStatus, claimDailyReward } from '../utils/api';
 import { useAppState } from '../context/AppStateContext';
 import './DailyRewardWidget.css';
 
-export function DailyRewardWidget() {
+function ControlledDailyRewardWidget({ streakDays = 0, hasClaimedToday = false, onClaim }) {
+  const [claimed, setClaimed] = useState(hasClaimedToday);
+
+  const handleClaim = () => {
+    if (claimed) return;
+    onClaim?.();
+    setClaimed(true);
+  };
+
+  return (
+    <div className={`daily-reward-widget ${claimed ? 'claimed' : 'available'}`}>
+      <div className="daily-reward-info">
+        <h3>Ежедневная награда</h3>
+        <p className="daily-reward-streak">День {streakDays}</p>
+      </div>
+      <button className="daily-reward-btn" onClick={handleClaim} disabled={claimed}>
+        {claimed ? 'Получено' : 'Получить'}
+      </button>
+    </div>
+  );
+}
+
+function ConnectedDailyRewardWidget() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
@@ -85,3 +107,13 @@ export function DailyRewardWidget() {
     </div>
   );
 }
+
+export function DailyRewardWidget(props) {
+  if (Object.prototype.hasOwnProperty.call(props, 'streakDays')) {
+    return <ControlledDailyRewardWidget {...props} />;
+  }
+
+  return <ConnectedDailyRewardWidget />;
+}
+
+export default DailyRewardWidget;

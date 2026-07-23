@@ -4,6 +4,7 @@ import { Body, EmptyState, GlassCard, RarityTag, Screen, TgHeader } from '../com
 import { fetchEvents, claimEventGoalReward } from '../utils/api.js';
 import { useAppState } from '../context/AppStateContext.jsx';
 import { formatNumber } from '../utils/format.js';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 export function EventsPage() {
   const { refreshAppState } = useAppState();
@@ -175,4 +176,8 @@ export function EventsPage() {
       </Body>
     </Screen>
   );
+}
+
+export default function EventsPageStandalone(props) {
+  return <StandalonePage><EventsPage {...props} /></StandalonePage>;
 }

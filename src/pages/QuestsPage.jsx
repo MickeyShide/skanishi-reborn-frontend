@@ -3,6 +3,7 @@ import { Icon } from '../components/Icon.jsx';
 import { Body, EmptyState, GlassCard, RarityTag, Screen, TgHeader } from '../components/ui.jsx';
 import { useAppState } from '../context/AppStateContext.jsx';
 import { claimQuestReward } from '../utils/api.js';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 export function QuestsPage() {
   const { quests, refreshAppState } = useAppState();
@@ -102,4 +103,8 @@ export function QuestsPage() {
       </Body>
     </Screen>
   );
+}
+
+export default function QuestsPageStandalone(props) {
+  return <StandalonePage><QuestsPage {...props} /></StandalonePage>;
 }

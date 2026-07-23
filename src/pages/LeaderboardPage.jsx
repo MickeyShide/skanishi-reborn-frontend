@@ -5,6 +5,7 @@ import { fetchLeaderboard } from '../utils/api.js';
 import { useAppState } from '../context/AppStateContext.jsx';
 import { formatNumber } from '../utils/format.js';
 import { Avatar } from '../components/ui.jsx';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 export function LeaderboardPage() {
   const { user } = useAppState();
@@ -107,4 +108,8 @@ export function LeaderboardPage() {
       </Body>
     </Screen>
   );
+}
+
+export default function LeaderboardPageStandalone(props) {
+  return <StandalonePage><LeaderboardPage {...props} /></StandalonePage>;
 }

@@ -3,6 +3,7 @@ import { Icon } from '../components/Icon.jsx';
 import { Body, EmptyState, Screen, TgHeader, GlassCard } from '../components/ui.jsx';
 import { fetchShop, buyShopItem, equipShopItem, craftShopItem } from '../utils/api.js';
 import { useAppState } from '../context/AppStateContext.jsx';
+import { StandalonePage } from '../components/StandalonePage.jsx';
 
 
 export function ShopPage() {
@@ -135,6 +136,10 @@ export function ShopPage() {
       </Body>
     </Screen>
   );
+}
+
+export default function ShopPageStandalone(props) {
+  return <StandalonePage><ShopPage {...props} /></StandalonePage>;
 }
 
 function ShopCard({ item, user, onBuy, onCraft, onEquip }) {
