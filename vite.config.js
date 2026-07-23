@@ -10,6 +10,13 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
       port: 5173,
+      watch: {
+        usePolling: true,
+        interval: 500,
+      },
+      hmr: {
+        clientPort: 5173,
+      },
       proxy: {
         '/api': {
           target: backendTarget,
